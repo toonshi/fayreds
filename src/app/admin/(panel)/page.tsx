@@ -3,7 +3,7 @@ import type { EnquiryType, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { FilterSelect } from "../_components/FilterSelect";
 import { StatusLabel } from "../_components/StatusLabel";
-import { TYPES, VIEWS, fmtDateTime, relTime, statusLabel, summaryOf, typeLabel } from "../_lib/format";
+import { TYPES, VIEWS, fmtDateTime, relTime, statusLabel, summaryLine, typeLabel } from "../_lib/format";
 import { btn, input } from "../_lib/ui";
 
 const PAGE_SIZE = 30;
@@ -96,7 +96,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
         <ul className="mt-2">
           {rows.map((e) => {
             const isNew = e.status === "NEW";
-            const summary = summaryOf(e.type, e.details, e.trip?.title, e.spots);
+            const summary = summaryLine(e.type, e.details, e.trip, e.spots);
             return (
               <li key={e.id} className="border-b border-stone-100 last:border-0">
                 <Link href={`/admin/enquiries/${e.id}`}

@@ -3,29 +3,47 @@ import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { site, siteUrl } from "@/lib/site";
 import { isKenyanPhone } from "@/lib/phone";
+import { CATEGORY_LABEL, matchOffers, needsFromDetails, suggestPackage } from "@/lib/deals";
 import { BackLink } from "../../../_components/BackLink";
+import { ContactButtons } from "../../../_components/ContactButtons";
+import { DealsPanel } from "../../../_components/DealsPanel";
 import { NotesForm } from "../../../_components/NotesForm";
 import { ReplyForm } from "../../../_components/ReplyForm";
 import { StatusLabel } from "../../../_components/StatusLabel";
 import { StatusSelect } from "../../../_components/StatusSelect";
 import {
-  detailGroups, fmtDate, fmtDateTime, fmtMoney, messageOf, paymentStatusLabel, plural, relTime, typeLabel, waNumber,
+  contactPref, detailGroups, fmtDate, fmtDateTime, fmtPayment, messageOf, paymentStatusLabel, plural, relTime, typeLabel,
 } from "../../../_lib/format";
-import { btn, h2 } from "../../../_lib/ui";
+import { h2 } from "../../../_lib/ui";
 
 export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const e = await db.enquiry.findUnique({
     where: { id },
-    include: { trip: true, payments: { orderBy: { createdAt: "desc" } } },
+    include: { trip: true, payments: { orderBy: { createdAt: "desc" } }, offerPicks: true },
   });
   if (!e) notFound();
 
   const firstName = e.name.split(" ")[0];
   const what = typeLabel(e.type).toLowerCase();
-  const waText = `Hi ${firstName}, this is Faith from ${site.name} about your ${what} request (${e.reference}).`;
+  const pref = contactPref(e);
+
+  // deal finder (consultations only)
+  const isConsult = e.type === "CONSULTATION";
+  const offers = isConsult ? await db.offer.findMany({ where: { active: true } }) : [];
+  const needs = needsFromDetails(e.details);
+  const matches = isConsult ? matchOffers(offers, needs) : [];
+  const pkg = suggestPackage(matches, needs);
+  const kes = (n: number) => `KES ${n.toLocaleString("en-KE")}`;
+  const packageText = pkg.items.length
+    ? `Hi ${firstName}, here is a plan for ${needs.destination || "your trip"} that fits your budget:\n` +
+      pkg.items.map((m) => `- ${CATEGORY_LABEL[m.offer.category]}: ${m.offer.title}, ${kes(m.totalKes)}${m.offer.bookingUrl ? ` (${m.offer.bookingUrl})` : ""}`).join("\n") +
+      `\nTotal about ${kes(pkg.totalKes)} (${kes(pkg.perPersonKes)} per person). Shall I book it for you? Faith, ${site.name}`
+    : null;
+
   const unpaid = (e.type === "CONSULTATION" || e.type === "RESERVATION") && !e.payments.some((p) => p.status === "PAID");
   const templates = [
+    ...(packageText ? [{ label: "Send suggested package", text: packageText }] : []),
     { label: "Thanks, I'll be in touch", text: `Hi ${firstName}, thank you for your ${what} request (${e.reference}). I've read it and I'll get back to you shortly. Faith, ${site.name}` },
     { label: "Ask for a call", text: `Hi ${firstName}, thanks for reaching out about your ${what} request (${e.reference}). When is a good time for a quick call this week? Faith, ${site.name}` },
     ...(unpaid ? [{ label: "Payment reminder", text: `Hi ${firstName}, your ${what} (${e.reference}) is waiting for payment. You can pay here: ${siteUrl(`/pay/${e.reference}`)} Faith, ${site.name}` }] : []),
@@ -54,17 +72,11 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
         <StatusSelect id={e.id} status={e.status} />
       </header>
 
-      <div className="mt-5 flex flex-wrap gap-2">
-        <a href={`https://wa.me/${waNumber(e.phone)}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer" className={btn.primary}>
-          <svg aria-hidden viewBox="0 0 24 24" className="size-4" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z" /></svg>
-          WhatsApp
-        </a>
-        <a href={`tel:${e.phone}`} className={btn.secondary}>
-          <span className="sr-only">Call </span><span className="tabular-nums">{e.phone}</span>
-        </a>
-        <a href={`mailto:${e.email}?subject=${encodeURIComponent(`${site.name}: your request ${e.reference}`)}`} className={`${btn.secondary} max-w-full`}>
-          <span className="sr-only">Email </span><span className="truncate">{e.email}</span>
-        </a>
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
+        <ContactButtons name={e.name} phone={e.phone} email={e.email} reference={e.reference} what={what} pref={pref} />
+        <p className="text-sm text-stone-500" title={pref.stated ? "The client chose this in the form" : "Not asked in this form: guessed from the phone number"}>
+          {pref.stated ? `Prefers ${pref.via}` : `${pref.via} suggested`}
+        </p>
       </div>
 
       <div className="mt-12 grid gap-y-14 lg:grid-cols-[minmax(0,1fr)_28rem] lg:gap-x-12">
@@ -108,7 +120,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
               <ul className="mt-3 divide-y divide-stone-100 border-y border-stone-100 text-sm">
                 {e.payments.map((p) => (
                   <li key={p.id} className="flex flex-wrap items-center gap-x-6 gap-y-1 py-3">
-                    <span className="w-28 font-medium tabular-nums">{fmtMoney(p.amount, p.currency)}</span>
+                    <span className="w-28 font-medium tabular-nums">{fmtPayment(p)}</span>
                     <span className="text-stone-600">{p.provider === "MPESA" ? "M-Pesa" : "Card"}</span>
                     <StatusLabel status={p.status}>{paymentStatusLabel(p.status)}</StatusLabel>
                     <span className="ml-auto text-stone-500 tabular-nums">
@@ -120,6 +132,10 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
                 ))}
               </ul>
             </section>
+          )}
+
+          {isConsult && (
+            <DealsPanel enquiryId={e.id} firstName={firstName} needs={needs} matches={matches} pkg={pkg} picks={e.offerPicks} hasOffers={offers.length > 0} />
           )}
         </div>
 

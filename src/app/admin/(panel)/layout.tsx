@@ -22,6 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <NavLink href="/admin" exact count={needReply}>Enquiries</NavLink>
             <NavLink href="/admin/payments">Payments</NavLink>
             <NavLink href="/admin/trips">Trips</NavLink>
+            <NavLink href="/admin/offers">Deals</NavLink>
           </nav>
           <div className="flex shrink-0 items-center gap-1">
             <Link href="/" target="_blank" className="hidden h-9 items-center rounded-lg px-3 text-sm text-stone-500 transition-colors duration-150 hover:bg-sand-100 hover:text-stone-900 sm:inline-flex">

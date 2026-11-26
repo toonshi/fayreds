@@ -65,6 +65,7 @@ const ADMIN_LABEL: Record<string, string> = {
   company: "Company", partnerType: "Type", locations: "Operates in", model: "Open to", commission: "Commission",
   priceRange: "Typical price", bookingSystem: "Tracking", start: "Start", spots: "Spots", payOption: "Paying",
   travellers: "Other travellers", room: "Room", dietary: "Dietary needs", emergency: "Emergency contact",
+  ages: "Ages", nights: "Nights", transfers: "Transfers",
 };
 
 // shown in the enquiry header instead (name, email, phone, country) or on their own (the free-text message)
@@ -91,20 +92,6 @@ export const messageOf = (details: unknown) => {
   return typeof m === "string" && m.trim() ? m.trim() : undefined;
 };
 
-/** One line saying what the person wants, for the inbox. */
-export function summaryOf(type: EnquiryType, details: unknown, tripTitle?: string | null, spots?: number | null): string {
-  const d = (details ?? {}) as Details;
-  const parts: unknown[] = [];
-  if (type === "CONSULTATION") {
-    const adults = Number(d.adults) || 0;
-    const children = Number(d.children) || 0;
-    const group = [adults && plural(adults, "adult"), children && plural(children, "child", "children")].filter(Boolean).join(", ");
-    parts.push(d.destination, d.dates, group);
-  } else if (type === "MARKETING") parts.push(d.businessName, d.businessType, d.location);
-  else if (type === "PARTNERSHIP") parts.push(d.company, d.partnerType, has(d.commission) ? `${d.commission} commission` : "");
-  else parts.push(tripTitle, spots ? plural(spots, "spot") : "");
-  return parts.filter(has).map(str).join(" · ");
-}
 
 const TZ = "Africa/Nairobi";
 export const fmtDate = (d: Date) => new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: TZ }).format(d);
@@ -139,3 +126,51 @@ export function nairobiMonthStart(now = new Date()) {
   return new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), 1) - 3 * 3600_000);
 }
 export const waNumber = (phone: string) => phone.replace(/[^\d]/g, "");
+
+// ---------------------------------------------------------------------------
+// Payments: Mike's payment code stores card (USD) payments in CENTS and M-Pesa (KES) in whole
+// shillings (see src/lib/payments.ts and notify.ts). Always display through these helpers.
+export const paymentAmount = (p: { amount: number; currency: string }) => (p.currency === "USD" ? p.amount / 100 : p.amount);
+export const fmtPayment = (p: { amount: number; currency: string }) => fmtMoney(paymentAmount(p), p.currency);
+
+// ---------------------------------------------------------------------------
+// How the client wants to be contacted. Consultations ask it directly; for the other forms we
+// assume WhatsApp for Kenyan numbers and email for everyone else (shown as a guess).
+export type ContactPref = { via: "WhatsApp" | "Email"; stated: boolean };
+export function contactPref(e: { details: unknown; phone: string }): ContactPref {
+  const said = (e.details as Record<string, unknown> | null)?.contactVia;
+  if (said === "WhatsApp" || said === "Email") return { via: said, stated: true };
+  return { via: e.phone.startsWith("+254") ? "WhatsApp" : "Email", stated: false };
+}
+
+// ---------------------------------------------------------------------------
+/** The few answers Faith needs first, per form type, as [label, value] pairs. */
+export function keyFacts(type: EnquiryType, details: unknown, trip?: { title: string } | null, spots?: number | null): [string, string][] {
+  const d = (details ?? {}) as Record<string, unknown>;
+  const v = (k: string) => {
+    const x = d[k];
+    if (x === undefined || x === null || x === "" || (Array.isArray(x) && x.length === 0)) return undefined;
+    return Array.isArray(x) ? x.join(", ") : String(x);
+  };
+  const rows: [string, string | undefined][] =
+    type === "CONSULTATION" ? [
+      ["Destination", v("destination")], ["Dates", v("dates")],
+      ["Travellers", v("adults") ? `${v("adults")} adult${v("adults") === "1" ? "" : "s"}${v("children") && v("children") !== "0" ? `, ${v("children")} child${v("children") === "1" ? "" : "ren"}` : ""}` : undefined],
+      ["Trip type", v("tripType")], ["Budget pp", v("budget")], ["Needs help with", v("help")],
+    ] : type === "RESERVATION" ? [
+      ["Trip", trip?.title], ["Spots", spots != null ? String(spots) : v("spots")], ["Paying", v("payOption")],
+      ["Room", v("room")], ["Dietary", v("dietary")], ["Emergency contact", v("emergency")],
+    ] : type === "MARKETING" ? [
+      ["Business", v("businessName")], ["Type", v("businessType")], ["Location", v("location")],
+      ["Wants", v("deliverables")], ["Goal", v("goal")], ["Budget", v("budget")],
+    ] : [
+      ["Company", v("company")], ["Partner type", v("partnerType")], ["Operates in", v("locations")],
+      ["Model", v("model")], ["Commission", v("commission")], ["Website", v("website")],
+    ];
+  return rows.filter((r): r is [string, string] => !!r[1]);
+}
+
+/** One line for the enquiries list, e.g. "Zanzibar · 10–20 June · 2 adults · KES 80,000–200,000…" */
+export function summaryLine(type: EnquiryType, details: unknown, trip?: { title: string } | null, spots?: number | null) {
+  return keyFacts(type, details, trip, spots).slice(0, 4).map(([, val]) => val).join(" · ");
+}

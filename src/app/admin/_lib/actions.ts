@@ -192,3 +192,81 @@ export async function deleteTrip(id: string) {
   revalidatePath("/trips");
   redirect("/admin/trips");
 }
+
+// ---------- deal finder: partner offers ----------
+const OfferSchema = z.object({
+  title: z.string().trim().min(3, "Give the offer a name"),
+  partner: z.string().trim().min(2, "Who is the partner?"),
+  category: z.enum(["STAY", "ACTIVITY", "TRANSPORT", "DINING", "NIGHTLIFE", "OTHER"], { message: "Choose a category" }),
+  location: z.string().trim().min(2, "Where is it?"),
+  priceKes: money,
+  unit: z.enum(["PER_PERSON", "PER_NIGHT", "PER_GROUP"], { message: "Choose how the price is charged" }),
+  maxGuests: z.preprocess((v) => (v === "" ? undefined : v), z.coerce.number().int("Whole numbers only").min(1, "At least 1").optional()),
+  tags: z.string(),
+  commissionPct: z.preprocess((v) => (v === "" ? 0 : v), z.coerce.number().int("Whole numbers only").min(0).max(100, "Up to 100%")),
+  bookingUrl: z.union([z.literal(""), z.url("Must be a full https:// link")]),
+  notes: z.string().trim().max(1000),
+  active: z.boolean(),
+});
+
+export type OfferFormState = TripFormState;
+
+export async function saveOffer(id: string | null, _: OfferFormState, form: FormData): Promise<OfferFormState> {
+  await requireAdmin();
+  const raw = Object.fromEntries(form);
+  const values = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, String(v)]));
+  const parsed = OfferSchema.safeParse({ ...raw, active: form.get("active") === "on" });
+  if (!parsed.success) {
+    const errors: Record<string, string> = {};
+    for (const issue of parsed.error.issues) errors[String(issue.path[0])] ??= issue.message;
+    const n = Object.keys(errors).length;
+    return { errors, values, message: `Fix ${n} highlighted field${n === 1 ? "" : "s"} and save again. Nothing you typed was lost.` };
+  }
+  const o = parsed.data;
+  const data = {
+    title: o.title, partner: o.partner, category: o.category, location: o.location, priceKes: o.priceKes, unit: o.unit,
+    maxGuests: o.maxGuests ?? null,
+    tags: o.tags.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean),
+    commissionPct: o.commissionPct, bookingUrl: o.bookingUrl || null, notes: o.notes || null, active: o.active,
+  };
+  if (id) await db.offer.update({ where: { id }, data });
+  else await db.offer.create({ data });
+  revalidatePath("/admin/offers");
+  redirect("/admin/offers?saved=1");
+}
+
+export async function toggleOffer(id: string) {
+  await requireAdmin();
+  const offer = await db.offer.findUniqueOrThrow({ where: { id } });
+  await db.offer.update({ where: { id }, data: { active: !offer.active } });
+  revalidatePath("/admin/offers");
+}
+
+export async function deleteOffer(id: string) {
+  await requireAdmin();
+  const booked = await db.offerPick.count({ where: { offerId: id } });
+  // keep commission history: offers that were booked are only switched off
+  if (booked > 0) await db.offer.update({ where: { id }, data: { active: false } });
+  else await db.offer.delete({ where: { id } });
+  revalidatePath("/admin/offers");
+  redirect("/admin/offers");
+}
+
+/** Records that Faith booked this offer for the client: the basis of her commission. */
+export async function markBooked(enquiryId: string, offerId: string, amountKes: number, commissionKes: number) {
+  await requireAdmin();
+  await db.offerPick.upsert({
+    where: { enquiryId_offerId: { enquiryId, offerId } },
+    create: { enquiryId, offerId, status: "BOOKED", amountKes, commissionKes },
+    update: { status: "BOOKED", amountKes, commissionKes },
+  });
+  revalidatePath(`/admin/enquiries/${enquiryId}`);
+  revalidatePath("/admin/offers");
+}
+
+export async function unmarkBooked(enquiryId: string, offerId: string) {
+  await requireAdmin();
+  await db.offerPick.deleteMany({ where: { enquiryId, offerId } });
+  revalidatePath(`/admin/enquiries/${enquiryId}`);
+  revalidatePath("/admin/offers");
+}

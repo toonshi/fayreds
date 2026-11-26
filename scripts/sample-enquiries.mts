@@ -51,12 +51,13 @@ for (const r of rows) {
       ...(r.type === "RESERVATION" && trip ? { tripId: trip.id, spots: 2 } : {}),
     },
   });
+  // card (USD) amounts are stored in cents, M-Pesa (KES) in whole shillings
   if (r.status === "PAID" || r.status === "AWAITING_PAYMENT" || r.status === "IN_PROGRESS" && r.type === "CONSULTATION") {
     const paid = r.status !== "AWAITING_PAYMENT";
     await db.payment.create({
       data: {
         enquiryId: e.id, provider: r.country === "Kenya" ? "MPESA" : "STRIPE", status: paid ? "PAID" : "PENDING",
-        amount: r.country === "Kenya" ? 13000 : 100, currency: r.country === "Kenya" ? "KES" : "USD",
+        amount: r.country === "Kenya" ? 13000 : 10000, currency: r.country === "Kenya" ? "KES" : "USD",
         description: "Sample payment", paidAt: paid ? hoursAgo(r.h - 1) : null,
         mpesaReceipt: paid && r.country === "Kenya" ? `SAMPLE${n}X` : null, createdAt: hoursAgo(r.h - 1),
       },

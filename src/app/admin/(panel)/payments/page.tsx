@@ -3,7 +3,7 @@ import type { PaymentProvider, PaymentStatus, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { FilterSelect } from "../../_components/FilterSelect";
 import { StatusLabel } from "../../_components/StatusLabel";
-import { fmtDateTime, fmtMoney, nairobiMonthStart, paymentStatusLabel, typeLabel } from "../../_lib/format";
+import { fmtDateTime, fmtMoney, fmtPayment, nairobiMonthStart, paymentAmount, paymentStatusLabel, typeLabel } from "../../_lib/format";
 import { btn } from "../../_lib/ui";
 
 const PROVIDERS: PaymentProvider[] = ["MPESA", "STRIPE"];
@@ -24,7 +24,8 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
     db.payment.groupBy({ by: ["currency"], where: { status: "PAID" }, _sum: { amount: true } }),
     db.payment.groupBy({ by: ["currency"], where: { status: "PAID", paidAt: { gte: monthStart } }, _sum: { amount: true } }),
   ]);
-  const sum = (rows: typeof totals, c: string) => rows.find((r) => r.currency === c)?._sum.amount ?? 0;
+  // card (USD) payments are stored in cents, M-Pesa (KES) in whole shillings
+  const sum = (rows: typeof totals, c: string) => paymentAmount({ amount: rows.find((r) => r.currency === c)?._sum.amount ?? 0, currency: c });
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
   const link = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams(Object.entries({ provider, status, ...patch }).filter(([, v]) => v) as [string, string][]);
@@ -75,7 +76,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                     {p.provider === "MPESA" ? "M-Pesa" : "Card"}
                     {p.mpesaReceipt && <span translate="no" className="ml-2 text-stone-400 tabular-nums">{p.mpesaReceipt}</span>}
                   </td>
-                  <td className="py-3.5 pr-6 text-right font-medium whitespace-nowrap tabular-nums">{fmtMoney(p.amount, p.currency)}</td>
+                  <td className="py-3.5 pr-6 text-right font-medium whitespace-nowrap tabular-nums">{fmtPayment(p)}</td>
                   <td className="py-3.5 pr-6">
                     <StatusLabel status={p.status}>{paymentStatusLabel(p.status)}</StatusLabel>
                     {p.failureReason && <span className="mt-0.5 block text-[13px] text-stone-500">{p.failureReason}</span>}
