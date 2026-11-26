@@ -3,18 +3,18 @@
 /* OWNER: Faith. Fayreds Travel brand tokens: change a colour here and it changes everywhere.
    Use them as Tailwind classes: bg-brand-800, text-sun-400, font-display, etc. */
 @theme {
-  /* Deep lagoon teal: the main brand colour (buttons, links, headings accents) */
-  --color-brand-50: #effaf8;
-  --color-brand-100: #d7f0ec;
-  --color-brand-200: #b0e0d9;
-  --color-brand-300: #7fc9bf;
-  --color-brand-400: #4eaca1;
-  --color-brand-500: #2f9086;
-  --color-brand-600: #1f746c;
-  --color-brand-700: #175e58;
-  --color-brand-800: #0f4c4a;
-  --color-brand-900: #0b3a38;
-  --color-brand-950: #062423;
+  /* Deep wine red: the main brand colour (dark panels, headings accents, links, the logo) */
+  --color-brand-50: #fdf3f4;
+  --color-brand-100: #fbe3e5;
+  --color-brand-200: #f5c2c7;
+  --color-brand-300: #ec97a0;
+  --color-brand-400: #dd6472;
+  --color-brand-500: #c43f4f;
+  --color-brand-600: #a32b3b;
+  --color-brand-700: #852232;
+  --color-brand-800: #6b1c2b;
+  --color-brand-900: #4f1420;
+  --color-brand-950: #2e0a12;
 
   /* Sunset amber: highlights, the sun in the logo, small accents (not for text on white) */
   --color-sun-100: #fdf0d8;
@@ -25,14 +25,14 @@
   --color-sun-600: #c46d12;
   --color-sun-700: #9b5410;
 
-  /* Clay terracotta: the main call-to-action colour (Book, Reserve, Pay). White text passes WCAG AA on 600+. */
-  --color-clay-50: #fbf3ee;
-  --color-clay-100: #f6e2d6;
-  --color-clay-200: #ecc2aa;
-  --color-clay-500: #c8643a;
-  --color-clay-600: #ad4f27;
-  --color-clay-700: #8f3f1d;
-  --color-clay-800: #6f3117;
+  /* Bright red: the main call-to-action colour (Book, Reserve, Pay). White text passes WCAG AA on 600+. */
+  --color-clay-50: #fdf2f2;
+  --color-clay-100: #fbe1e1;
+  --color-clay-200: #f2b8b8;
+  --color-clay-500: #d23a3f;
+  --color-clay-600: #b3242c;
+  --color-clay-700: #921d24;
+  --color-clay-800: #6e161b;
 
   /* Warm sand: page backgrounds */
   --color-sand-50: #fbf8f3;

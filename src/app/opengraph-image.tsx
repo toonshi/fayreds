@@ -9,9 +9,9 @@ export default function OgImage() {
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between",
-        padding: 72, color: "white", background: "linear-gradient(135deg, #0f4c4a 0%, #13706b 55%, #f2a541 100%)" }}>
+        padding: 72, color: "white", background: "linear-gradient(135deg, #6b1c2b 0%, #a32b3b 55%, #f2a541 100%)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 34, fontWeight: 700, letterSpacing: 2 }}>
-          <div style={{ width: 64, height: 64, borderRadius: 32, background: "#f2a541", display: "flex", alignItems: "center", justifyContent: "center", color: "#0f4c4a", fontSize: 40 }}>F</div>
+          <div style={{ width: 64, height: 64, borderRadius: 32, background: "#f2a541", display: "flex", alignItems: "center", justifyContent: "center", color: "#6b1c2b", fontSize: 40 }}>F</div>
           FAYREDS TRAVEL
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
