@@ -7,10 +7,8 @@ import { bio } from "@/content/bio";
 import { testimonials } from "@/content/testimonials";
 import { TripCard } from "@/components/TripCard";
 import { Price } from "@/components/currency";
-import { LogoMark } from "@/components/Logo";
 import { SocialIcons } from "@/components/SocialIcons";
 import { Icon } from "@/components/Icon";
-import { tripDates } from "@/components/trip-format";
 import { Recognition } from "@/components/Recognition";
 
 export const dynamic = "force-dynamic";
@@ -64,10 +62,7 @@ export default async function HomePage() {
         <div aria-hidden className="pointer-events-none absolute -bottom-48 -left-32 h-[30rem] w-[30rem] rounded-full bg-brand-100/70 blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-12 sm:pt-20 lg:grid-cols-2">
           <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-brand-800 ring-1 ring-brand-100">
-              <span aria-hidden className="h-2 w-2 rounded-full bg-sun-400" /> Travel creator · Hospitality insider
-            </p>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.05] text-stone-900 sm:text-6xl">
+            <h1 className="text-4xl font-bold leading-[1.05] text-stone-900 sm:text-6xl">
               Travel smarter with <span className="text-brand-800">Faith</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-stone-700">{bio.short}</p>
@@ -101,30 +96,6 @@ export default async function HomePage() {
                   <div aria-hidden className="absolute inset-x-0 bottom-0 h-[48%] bg-brand-800" />
                 </>
               )}
-              <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/95 p-4 shadow-lg backdrop-blur">
-                <p className="text-sm text-stone-600">Next trip</p>
-                {trips[0] ? (
-                  <>
-                    <Link href={`/trips/${trips[0].slug}`} className="font-display text-lg font-semibold text-stone-900 after:absolute after:inset-0 after:rounded-2xl hover:underline">
-                      {trips[0].title}
-                    </Link>
-                    <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm tabular-nums text-stone-700">
-                      <span>{tripDates(trips[0].startDate, trips[0].endDate)}</span>
-                      <span aria-hidden>·</span>
-                      <span>from <Price kes={trips[0].priceKes} usd={trips[0].priceUsd} className="font-semibold text-stone-900" /></span>
-                    </p>
-                  </>
-                ) : (
-                  <p className="font-display text-lg font-semibold">New trips coming soon</p>
-                )}
-              </div>
-            </div>
-            <div className="absolute -left-4 top-8 hidden rounded-2xl bg-white p-3 shadow-lg ring-1 ring-stone-100 sm:flex sm:items-center sm:gap-3">
-              <LogoMark className="h-10 w-10" />
-              <div className="pr-2 text-sm">
-                <p className="font-semibold text-stone-900">Top 100 in African travel</p>
-                <p className="text-stone-600">Most Impactful People 2025</p>
-              </div>
             </div>
           </div>
         </div>
