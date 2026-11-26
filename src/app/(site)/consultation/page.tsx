@@ -10,14 +10,21 @@ export const metadata: Metadata = {
   alternates: { canonical: "/consultation" },
 };
 
-export default function ConsultationPage() {
+export default async function ConsultationPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
+  const q = await searchParams;
+  // answers carried over from the home page trip planner
+  const pick = (v?: string) => (v ? v.slice(0, 120) : undefined);
+  const initialValues = Object.fromEntries(
+    Object.entries({ destination: pick(q.destination), dates: pick(q.dates), adults: /^\d{1,2}$/.test(q.adults ?? "") ? q.adults : "1" })
+      .filter(([, v]) => v),
+  ) as Record<string, string>;
   return (
     <FormPage
       kind="consultation"
       eyebrow="For travellers"
       title="Plan your trip with Faith"
       submitLabel="Continue to payment"
-      initialValues={{ adults: "1" }}
+      initialValues={initialValues}
       footnote="Kenyans pay by M-Pesa, international clients by card. You'll get an SMS (Kenyan numbers) and an email receipt."
       steps={[
         "Tell Faith about your trip: where, when, budget and what you love.",

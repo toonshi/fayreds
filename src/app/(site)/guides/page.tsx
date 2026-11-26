@@ -12,7 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/guides" },
 };
 
-export default async function GuidesPage() {
+export default async function GuidesPage({ searchParams }: { searchParams: Promise<{ topic?: string }> }) {
+  const { topic } = await searchParams;
   // TikTok cover lookups only for videos without their own cover image
   const thumbs = Object.fromEntries(await Promise.all(videos.map(async (v) => [v.id, v.cover ? undefined : (await getTikTokMeta(videoUrl(v.id))).thumbnail] as const)));
 
@@ -26,7 +27,7 @@ export default async function GuidesPage() {
       </section>
 
       <section aria-label="All guides" className="mx-auto max-w-6xl px-4 pb-12 pt-4">
-        <GuideGrid videos={videos} thumbs={thumbs} />
+        <GuideGrid key={topic ?? "all"} videos={videos} thumbs={thumbs} initialTopic={topic} />
       </section>
 
       <section className="mt-8 bg-brand-900 text-white">

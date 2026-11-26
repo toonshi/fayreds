@@ -4,9 +4,9 @@ import { useState } from "react";
 import { categoryLabel, type Video, type VideoCategory } from "@/content/videos";
 import { TikTokCard } from "./TikTokCard";
 
-export function GuideGrid({ videos, thumbs }: { videos: Video[]; thumbs: Record<string, string | undefined> }) {
+export function GuideGrid({ videos, thumbs, initialTopic }: { videos: Video[]; thumbs: Record<string, string | undefined>; initialTopic?: string }) {
   const topics = [...new Set(videos.map((v) => v.category))] as VideoCategory[];
-  const [topic, setTopic] = useState<VideoCategory | "all">("all");
+  const [topic, setTopic] = useState<VideoCategory | "all">(topics.includes(initialTopic as VideoCategory) ? (initialTopic as VideoCategory) : "all");
   const shown = topic === "all" ? videos : videos.filter((v) => v.category === topic);
   const chip = (active: boolean) =>
     `inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 text-sm font-medium transition-colors ${active ? "bg-brand-800 text-white" : "bg-white text-stone-800 ring-1 ring-stone-300 hover:bg-brand-50"}`;
