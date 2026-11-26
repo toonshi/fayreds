@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { forms, type FormKind } from "@/lib/forms";
 import { FormRenderer, type FormValues } from "./FormRenderer";
+import { FormTabs } from "./FormTabs";
 
 export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, footnote, initialValues, after }: {
   kind: FormKind;
@@ -39,7 +40,8 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
             </div>
           </div>
         </div>
-        <section id="plan" aria-label="Form" className="scroll-mt-24 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-8 lg:col-span-3">
+        <section id="plan" aria-label="Form" className="scroll-mt-24 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-8 lg:col-span-3 lg:self-start">
+          <FormTabs active={kind} />
           <FormRenderer kind={kind} submitLabel={submitLabel} footnote={footnote} initialValues={initialValues} />
         </section>
       </div>
