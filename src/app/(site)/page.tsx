@@ -12,6 +12,8 @@ import { SocialIcons } from "@/components/SocialIcons";
 import { Icon } from "@/components/Icon";
 import { tripDates } from "@/components/trip-format";
 import { Recognition } from "@/components/Recognition";
+import { VideoGuides } from "@/components/VideoGuides";
+import { videos } from "@/content/videos";
 
 export const dynamic = "force-dynamic";
 
@@ -175,7 +177,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Recognition tone="sand" />
+      <VideoGuides
+        title="Watch Faith's guides"
+        intro="Where to eat, where to stay and what to do, filmed on the spot. Tap a video to play it here."
+        videos={videos}
+        showAllLink
+        tone="sand"
+      />
+
+      <Recognition />
 
       {/* ---------- Upcoming trips ---------- */}
       {trips.length > 0 && (

@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { forms, type FormKind } from "@/lib/forms";
 import { FormRenderer, type FormValues } from "./FormRenderer";
 
-export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, footnote, initialValues }: {
+export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, footnote, initialValues, after }: {
   kind: FormKind;
   eyebrow: string;
   title: string;
@@ -14,6 +14,8 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
   submitLabel: string;
   footnote?: ReactNode;
   initialValues?: FormValues;
+  /** extra sections below the form (e.g. example content) */
+  after?: ReactNode;
 }) {
   return (
     <main className="bg-sand-50 text-stone-900">
@@ -41,6 +43,7 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
           <FormRenderer kind={kind} submitLabel={submitLabel} footnote={footnote} initialValues={initialValues} />
         </section>
       </div>
+      {after}
     </main>
   );
 }
