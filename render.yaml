@@ -43,7 +43,7 @@ services:
       - key: FAITH_ALERT_PHONE
         value: "+254701484995"
       # SMS (Africa's Talking): empty = demo mode
-      - { key: AT_USERNAME, sync: false }
+      - { key: AT_USERNAME, value: sandbox }
       - { key: AT_API_KEY, sync: false }
       - { key: AT_SENDER_ID, sync: false }
       # Email (Gmail SMTP)
