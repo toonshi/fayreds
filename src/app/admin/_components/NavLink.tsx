@@ -8,7 +8,8 @@ export function NavLink({ href, exact, children }: { href: string; exact?: boole
   return (
     <Link
       href={href}
-      className={`rounded-md px-3 py-1.5 ${active ? "bg-teal-50 font-semibold text-teal-800" : "text-stone-600 hover:bg-stone-100"}`}
+      aria-current={active ? "page" : undefined}
+      className={`inline-flex min-h-11 shrink-0 items-center rounded-md px-3 ${active ? "bg-teal-50 font-semibold text-teal-800" : "text-stone-700 hover:bg-stone-100"}`}
     >
       {children}
     </Link>

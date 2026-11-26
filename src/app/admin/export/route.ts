@@ -2,7 +2,7 @@
 import type { EnquiryStatus, EnquiryType, PaymentProvider, PaymentStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
-import { detailRows, statusLabel, typeLabel } from "../_lib/format";
+import { detailRows, nairobiDay, statusLabel, typeLabel } from "../_lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -21,15 +21,17 @@ export async function GET(req: Request) {
   let csv: string;
 
   if (kind === "enquiries") {
-    const to = sp.get("to");
+    const ymd = (k: string) => { const v = sp.get(k); return v && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null; };
+    const from = ymd("from");
+    const to = ymd("to");
     const q = sp.get("q")?.trim();
     const rows = await db.enquiry.findMany({
       where: {
         type: (sp.get("type") as EnquiryType) || undefined,
         status: (sp.get("status") as EnquiryStatus) || undefined,
         tripId: sp.get("trip") || undefined,
-        createdAt: sp.get("from") || to
-          ? { gte: sp.get("from") ? new Date(sp.get("from")!) : undefined, lt: to ? new Date(new Date(to).getTime() + 86_400_000) : undefined }
+        createdAt: from || to
+          ? { gte: from ? nairobiDay(from) : undefined, lt: to ? new Date(nairobiDay(to).getTime() + 86_400_000) : undefined }
           : undefined,
         OR: q ? [
           { reference: { contains: q, mode: "insensitive" } }, { name: { contains: q, mode: "insensitive" } },

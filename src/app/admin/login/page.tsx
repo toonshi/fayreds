@@ -13,7 +13,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
       <div className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-sm ring-1 ring-stone-200">
         <p className="text-xs font-semibold uppercase tracking-widest text-teal-700">Fayreds Travel</p>
         <h1 className="mt-1 text-2xl font-bold">Admin</h1>
-        <p className="mt-1 text-sm text-stone-500">Sign in to see enquiries, payments and trips.</p>
+        <p className="mt-1 text-sm text-stone-600">Sign in to see enquiries, payments and trips.</p>
         <LoginForm next={next ?? ""} />
       </div>
     </main>

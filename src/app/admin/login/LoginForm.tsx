@@ -11,11 +11,11 @@ export function LoginForm({ next }: { next: string }) {
         <span className="text-sm font-medium">Password</span>
         <input
           name="password" type="password" required autoFocus autoComplete="current-password"
-          className="mt-1 w-full rounded-lg border border-stone-300 px-3 py-2 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-600/20"
+          className="mt-1 min-h-11 w-full rounded-lg border border-stone-300 px-3 text-base outline-none focus-visible:border-teal-700 focus-visible:ring-2 focus-visible:ring-teal-700/40"
         />
       </label>
       {state?.error && <p role="alert" className="text-sm text-rose-700">{state.error}</p>}
-      <button disabled={pending} className="w-full rounded-lg bg-teal-700 py-2.5 font-semibold text-white hover:bg-teal-800 disabled:opacity-60">
+      <button disabled={pending} className="min-h-11 w-full cursor-pointer rounded-lg bg-teal-700 font-semibold text-white transition-[background-color,scale] hover:bg-teal-800 active:not-disabled:scale-[0.96] disabled:opacity-60">
         {pending ? "Signing in…" : "Sign in"}
       </button>
     </form>

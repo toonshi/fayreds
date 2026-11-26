@@ -61,5 +61,17 @@ export const fmtDate = (d: Date) =>
 export const fmtDateTime = (d: Date) =>
   d.toLocaleString("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "Africa/Nairobi" });
 export const fmtMoney = (amount: number, currency: string) =>
-  currency === "KES" ? `KES ${amount.toLocaleString("en-KE")}` : `$${amount.toLocaleString("en-US")}`;
+  currency === "KES" ? `KES ${amount.toLocaleString("en-KE")}` : `US$${amount.toLocaleString("en-US")}`;
+
+/** "1 spot", "3 spots" */
+export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
+
+/** A YYYY-MM-DD from a date input, as the start of that day in Nairobi (UTC+3, no daylight saving). */
+export const nairobiDay = (ymd: string) => new Date(`${ymd}T00:00:00+03:00`);
+
+/** First instant of the current month in Nairobi. */
+export function nairobiMonthStart(now = new Date()) {
+  const eat = new Date(now.getTime() + 3 * 3600_000);
+  return new Date(Date.UTC(eat.getUTCFullYear(), eat.getUTCMonth(), 1) - 3 * 3600_000);
+}
 export const waNumber = (phone: string) => phone.replace(/[^\d]/g, "");
