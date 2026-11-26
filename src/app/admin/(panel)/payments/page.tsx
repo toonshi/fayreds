@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { PaymentProvider, PaymentStatus, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { Badge } from "../../_components/Badge";
-import { fmtDateTime, fmtMoney, nairobiMonthStart, statusColor, typeLabel } from "../../_lib/format";
+import { contactPref, fmtDateTime, fmtMoney, fmtPayment, nairobiMonthStart, statusColor, typeLabel } from "../../_lib/format";
+import { ContactButtons } from "../../_components/ContactButtons";
 
 const PROVIDERS: PaymentProvider[] = ["MPESA", "STRIPE"];
 const PSTATUS: PaymentStatus[] = ["PAID", "PENDING", "FAILED", "CANCELLED"];
@@ -23,7 +24,11 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
     db.payment.groupBy({ by: ["currency"], where: { status: "PAID" }, _sum: { amount: true } }),
     db.payment.groupBy({ by: ["currency"], where: { status: "PAID", paidAt: { gte: monthStart } }, _sum: { amount: true } }),
   ]);
-  const sum = (rows: typeof totals, c: string) => rows.find((r) => r.currency === c)?._sum.amount ?? 0;
+  // card (USD) payments are stored in cents, M-Pesa (KES) in whole shillings
+  const sum = (rows: typeof totals, c: string) => {
+    const raw = rows.find((r) => r.currency === c)?._sum.amount ?? 0;
+    return c === "USD" ? raw / 100 : raw;
+  };
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
   const link = (patch: Record<string, string | undefined>) => {
     const p = new URLSearchParams(Object.entries({ ...sp, page: undefined, ...patch }).filter(([, v]) => v) as [string, string][]);
@@ -59,22 +64,27 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
         {PSTATUS.map((s) => <Link key={s} href={link({ status: s })} className={pill(status === s)}>{s.toLowerCase()}</Link>)}
       </div>
 
-      <ul className="space-y-2 sm:hidden">
+      <ul className="space-y-3 sm:hidden">
         {payments.map((p) => (
-          <li key={p.id}>
-            <Link href={`/admin/enquiries/${p.enquiryId}`} className="block rounded-xl bg-white p-4 ring-1 ring-stone-200 active:bg-stone-50">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-teal-800">{p.enquiry.name}</p>
-                  <p className="text-sm text-stone-600">{typeLabel(p.enquiry.type)} · {p.provider === "MPESA" ? "M-Pesa" : "Card"}</p>
-                </div>
-                <p className="text-right font-semibold tabular-nums">{fmtMoney(p.amount, p.currency)}</p>
+          <li key={p.id} className="rounded-xl bg-white p-4 ring-1 ring-stone-200">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <Link href={`/admin/enquiries/${p.enquiryId}`} className="inline-flex min-h-11 items-center font-semibold text-teal-800 hover:underline">{p.enquiry.name}</Link>
+                <p className="text-sm text-stone-600">{p.description}</p>
               </div>
-              <div className="mt-2 flex items-center justify-between gap-2 text-xs text-stone-600">
-                <Badge className={statusColor[p.status]}>{p.status.toLowerCase()}</Badge>
-                <span className="tabular-nums">{fmtDateTime(p.paidAt ?? p.createdAt)}</span>
+              <div className="text-right">
+                <p className="font-semibold tabular-nums">{fmtPayment(p)}</p>
+                <p className="text-xs text-stone-600">{p.provider === "MPESA" ? "M-Pesa" : "Card"}</p>
               </div>
-            </Link>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-stone-600">
+              <Badge className={statusColor[p.status]}>{p.status === "PAID" ? "Paid" : p.status.toLowerCase()}</Badge>
+              <span className="tabular-nums">{fmtDateTime(p.paidAt ?? p.createdAt)}</span>
+              {p.mpesaReceipt && <span className="font-mono">Receipt {p.mpesaReceipt}</span>}
+            </div>
+            <div className="mt-3">
+              <ContactButtons compact name={p.enquiry.name} phone={p.enquiry.phone} email={p.enquiry.email} reference={p.enquiry.reference} what={typeLabel(p.enquiry.type).toLowerCase()} pref={contactPref(p.enquiry)} />
+            </div>
           </li>
         ))}
         {payments.length === 0 && <li className="rounded-xl bg-white p-8 text-center text-stone-600 ring-1 ring-stone-200">No payments yet.</li>}
@@ -86,7 +96,7 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
             <tr>
               <th className="px-4 py-3">Date</th><th className="px-4 py-3">Client</th><th className="px-4 py-3">For</th>
               <th className="px-4 py-3">Method</th><th className="px-4 py-3 text-right">Amount</th>
-              <th className="px-4 py-3">Status</th><th className="px-4 py-3">Receipt / ref</th>
+              <th className="px-4 py-3">Status</th><th className="px-4 py-3">Receipt / ref</th><th className="px-4 py-3">Contact</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-stone-100">
@@ -96,15 +106,17 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
                 <td className="px-4 py-3">
                   <Link href={`/admin/enquiries/${p.enquiryId}`} className="font-medium text-teal-800 hover:underline">{p.enquiry.name}</Link>
                   <div translate="no" className="whitespace-nowrap font-mono text-xs text-stone-600">{p.enquiry.reference}</div>
+                  <div className="text-xs text-stone-600">{p.enquiry.phone}</div>
                 </td>
-                <td className="px-4 py-3">{typeLabel(p.enquiry.type)}</td>
+                <td className="px-4 py-3">{typeLabel(p.enquiry.type)}<div className="text-xs text-stone-600">{p.description}</div></td>
                 <td className="px-4 py-3">{p.provider === "MPESA" ? "M-Pesa" : "Card"}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-right font-medium tabular-nums">{fmtMoney(p.amount, p.currency)}</td>
+                <td className="whitespace-nowrap px-4 py-3 text-right font-medium tabular-nums">{fmtPayment(p)}</td>
                 <td className="px-4 py-3"><Badge className={statusColor[p.status]}>{p.status.toLowerCase()}</Badge></td>
                 <td className="px-4 py-3 font-mono text-xs text-stone-600">{p.mpesaReceipt ?? p.stripeSessionId?.slice(-12) ?? p.failureReason ?? "—"}</td>
+                <td className="px-4 py-3"><ContactButtons compact name={p.enquiry.name} phone={p.enquiry.phone} email={p.enquiry.email} reference={p.enquiry.reference} what={typeLabel(p.enquiry.type).toLowerCase()} pref={contactPref(p.enquiry)} /></td>
               </tr>
             ))}
-            {payments.length === 0 && <tr><td colSpan={7} className="px-4 py-12 text-center text-stone-600">No payments yet.</td></tr>}
+            {payments.length === 0 && <tr><td colSpan={8} className="px-4 py-12 text-center text-stone-600">No payments yet.</td></tr>}
           </tbody>
         </table>
       </div>

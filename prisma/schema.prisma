@@ -64,7 +64,7 @@ model Payment {
   enquiry           Enquiry         @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
   provider          PaymentProvider
   status            PaymentStatus   @default(PENDING)
-  amount            Int             /// whole currency units (KES or USD), same as Quote.amount. Stripe needs ×100 when sending.
+  amount            Int             /// M-Pesa: whole KES. Card (Stripe): USD CENTS. Display via paymentAmount()/fmtPayment() in admin/_lib/format.ts
   currency          String          /// "KES" or "USD"
   description       String
   mpesaCheckoutId   String?         @unique
