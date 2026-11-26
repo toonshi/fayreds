@@ -1,0 +1,62 @@
+# Render Blueprint: creates the website + its PostgreSQL database in one go.
+# Render dashboard → New → Blueprint → pick the toonshi/fayreds repo → Apply.
+# Variables marked `sync: false` are asked for during setup (secrets are never stored in git).
+
+databases:
+  - name: fayreds-db
+    databaseName: fayreds
+    user: fayreds
+    region: frankfurt          # closest Render region to Kenya
+    plan: basic-256mb          # paid (~$6/mo). Free databases are deleted after 30 days.
+    ipAllowList: []            # only reachable from Render services, not the internet
+
+services:
+  - type: web
+    name: fayreds
+    runtime: node
+    region: frankfurt          # must match the database region
+    plan: starter              # paid (~$7/mo). Free web services sleep when idle and miss M-Pesa callbacks.
+    branch: main
+    buildCommand: npm ci && npm run build
+    preDeployCommand: npx prisma migrate deploy
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: DATABASE_URL
+        fromDatabase: { name: fayreds-db, property: connectionString }
+      - key: DIRECT_URL
+        fromDatabase: { name: fayreds-db, property: connectionString }
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: SITE_URL            # e.g. https://fayreds.onrender.com, later https://your-domain
+        sync: false
+      - key: CONSULTATION_PRICE_USD
+        value: "100"
+      - key: CONSULTATION_PRICE_KES
+        value: "13000"
+      - key: FAITH_ALERT_PHONE
+        value: "+254701484995"
+      # SMS (Africa's Talking) – empty = demo mode
+      - { key: AT_USERNAME, sync: false }
+      - { key: AT_API_KEY, sync: false }
+      - { key: AT_SENDER_ID, sync: false }
+      # Email (Gmail SMTP)
+      - { key: SMTP_HOST, value: smtp.gmail.com }
+      - { key: SMTP_PORT, value: "465" }
+      - { key: SMTP_USER, value: fayredstravel@gmail.com }
+      - { key: SMTP_PASS, sync: false }
+      # M-Pesa Daraja
+      - { key: MPESA_ENV, value: sandbox }
+      - { key: MPESA_CONSUMER_KEY, sync: false }
+      - { key: MPESA_CONSUMER_SECRET, sync: false }
+      - { key: MPESA_SHORTCODE, sync: false }
+      - { key: MPESA_PASSKEY, sync: false }
+      - key: MPESA_CALLBACK_SECRET
+        generateValue: true
+      # Stripe
+      - { key: STRIPE_SECRET_KEY, sync: false }
+      - { key: STRIPE_WEBHOOK_SECRET, sync: false }
