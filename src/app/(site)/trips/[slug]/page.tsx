@@ -49,27 +49,29 @@ export default async function TripPage({ params }: Params) {
     <main className="bg-sand-50 text-stone-900">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
 
-      <div className="mx-auto max-w-6xl px-4 pt-6">
-        <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
-          <Link href="/trips" className="-ml-1 inline-flex min-h-11 items-center gap-1 px-1 hover:text-stone-900 hover:underline"><Icon name="arrowLeft" /> All trips</Link>
-        </nav>
-      </div>
-
-      <header className="mx-auto mt-4 max-w-6xl px-4">
-        <div className="relative aspect-[16/9] overflow-hidden rounded-3xl sm:aspect-[3/1]">
+      {/* Full-width photo with the title on top */}
+      <header className="relative isolate overflow-hidden bg-brand-950 text-white">
+        <div className="absolute inset-0 -z-10">
           <TripImage src={trip.imageUrl} alt={trip.destination} seed={trip.slug} priority showLabel={false} />
+          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-brand-950/90 via-brand-950/35 to-brand-950/10" />
         </div>
-        <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
+        <div className="mx-auto flex min-h-[26rem] max-w-6xl flex-col justify-between px-5 pb-10 pt-4 sm:min-h-[32rem] sm:px-6">
+          <nav aria-label="Breadcrumb" className="text-sm">
+            <Link href="/trips" className="-ml-1 inline-flex min-h-11 items-center gap-1.5 rounded-full px-3 text-white/90 backdrop-blur hover:bg-white/10"><Icon name="arrowLeft" /> All trips</Link>
+          </nav>
           <div>
-            <p className="font-medium text-brand-800">{trip.destination}</p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-5xl">{trip.title}</h1>
-            <p className="mt-2 text-lg text-stone-600">{tripDates(trip.startDate, trip.endDate)} · {n + 1} days, {n} nights</p>
+            <p className="eyebrow text-sun-300">{trip.destination}</p>
+            <h1 className="mt-3 max-w-3xl text-4xl leading-[1.05] sm:text-6xl">{trip.title}</h1>
+            <p className="mt-3 text-lg tabular-nums text-white/85">{tripDates(trip.startDate, trip.endDate)} · {n + 1} days, {n} nights</p>
           </div>
-          <CurrencyToggle />
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-10 lg:grid-cols-5">
+      <div className="mx-auto mt-6 flex max-w-6xl justify-end px-5 sm:px-6">
+        <CurrencyToggle />
+      </div>
+
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 pb-28 pt-6 sm:px-6 lg:grid-cols-5 lg:pb-16">
         <div className="space-y-10 lg:col-span-3">
           <section>
             <h2 className="sr-only">About this trip</h2>
@@ -78,10 +80,10 @@ export default async function TripPage({ params }: Params) {
 
           {trip.highlights.length > 0 && (
             <section>
-              <h2 className="text-xl font-bold">Highlights</h2>
+              <h2 className="text-3xl text-ink">Highlights</h2>
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                 {trip.highlights.map((h) => (
-                  <li key={h} className="flex gap-3 rounded-xl bg-white p-4 ring-1 ring-stone-200">
+                  <li key={h} className="flex gap-3 border-t border-stone-900/10 py-4">
                     <Icon name="star" className="mt-0.5 h-5 w-5 text-sun-500" /><span>{h}</span>
                   </li>
                 ))}
@@ -91,7 +93,7 @@ export default async function TripPage({ params }: Params) {
 
           {trip.includes.length > 0 && (
             <section>
-              <h2 className="text-xl font-bold">What&apos;s included</h2>
+              <h2 className="text-3xl text-ink">What&apos;s included</h2>
               <ul className="mt-4 space-y-2">
                 {trip.includes.map((x) => (
                   <li key={x} className="flex gap-3"><Icon name="check" className="mt-1 h-4 w-4 text-brand-700" /><span>{x}</span></li>
@@ -100,10 +102,10 @@ export default async function TripPage({ params }: Params) {
             </section>
           )}
 
-          <section id="reserve" className="scroll-mt-24 rounded-2xl bg-white p-5 ring-1 ring-stone-200 sm:p-8">
+          <section id="reserve" className="-mx-5 scroll-mt-24 bg-white px-5 py-8 ring-1 ring-stone-900/10 sm:mx-0 sm:rounded-2xl sm:p-10">
             {left > 0 ? (
               <>
-                <h2 className="text-2xl font-bold">Reserve your spot</h2>
+                <h2 className="text-3xl text-ink">Reserve your spot</h2>
                 <p className="mt-1 mb-6 text-stone-600">{forms_intro}</p>
                 <ReservationForm
                   tripSlug={trip.slug}
@@ -123,11 +125,11 @@ export default async function TripPage({ params }: Params) {
           </section>
         </div>
 
-        <aside className="order-first lg:order-none lg:col-span-2">
-          <div className="space-y-4 rounded-2xl bg-white p-6 ring-1 ring-stone-200 lg:sticky lg:top-24">
+        <aside className="hidden lg:col-span-2 lg:block">
+          <div className="space-y-4 rounded-2xl bg-white p-7 ring-1 ring-stone-900/10 lg:sticky lg:top-24">
             <div>
               <p className="text-sm text-stone-500">Price per person</p>
-              <Price kes={trip.priceKes} usd={trip.priceUsd} className="text-3xl font-bold" />
+              <Price kes={trip.priceKes} usd={trip.priceUsd} className="font-display text-4xl text-ink" />
             </div>
             <div className="rounded-xl bg-sand-50 p-4 text-sm">
               <p>Reserve with a deposit of <Price kes={trip.depositKes} usd={trip.depositUsd} className="font-semibold" /> per person.</p>
@@ -137,12 +139,30 @@ export default async function TripPage({ params }: Params) {
               {left === 0 ? "Fully booked" : `${left} of ${trip.totalSpots} spots left`}
             </p>
             {left > 0 && (
-              <a href="#reserve" className="block rounded-full bg-brand-800 px-6 py-3 text-center font-semibold text-white transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96]">Reserve a spot</a>
+              <a href="#reserve" className="block rounded-full bg-clay-600 px-6 py-3 text-center font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96]">Reserve a spot</a>
             )}
             <a href={whatsappLink(`Hi Faith, I have a question about ${trip.title}.`)} target="_blank" rel="noreferrer"
               className="block rounded-full px-6 py-3 text-center font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Ask Faith a question</a>
           </div>
         </aside>
+      </div>
+
+      {/* Phones: price and Reserve stay on screen while scrolling */}
+      <div className="fixed inset-x-0 bottom-0 z-30 border-t border-stone-900/10 bg-white/95 px-5 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-4">
+          <div className="min-w-0 flex-1">
+            <Price kes={trip.priceKes} usd={trip.priceUsd} className="block truncate text-lg font-semibold tabular-nums text-ink" />
+            <p className={`text-xs ${left === 0 ? "text-stone-500" : left <= 3 ? "font-semibold text-clay-700" : "text-stone-600"}`}>
+              {left === 0 ? "Fully booked" : left <= 3 ? `Only ${left} spot${left === 1 ? "" : "s"} left` : "per person · deposit to reserve"}
+            </p>
+          </div>
+          {left > 0 ? (
+            <a href="#reserve" className="inline-flex min-h-12 items-center rounded-full bg-clay-600 px-6 font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96]">Reserve spot</a>
+          ) : (
+            <a href={whatsappLink(`Hi Faith, please add me to the waiting list for ${trip.title}.`)} target="_blank" rel="noreferrer"
+              className="inline-flex min-h-12 items-center rounded-full bg-brand-800 px-5 font-semibold text-white">Join waiting list</a>
+          )}
+        </div>
       </div>
     </main>
   );

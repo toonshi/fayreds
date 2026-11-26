@@ -18,18 +18,18 @@ export function SiteHeader() {
   const active = (href: string) => path === href || path.startsWith(href + "/");
 
   return (
-    <header className="sticky top-0 z-40 border-b border-stone-200/70 bg-sand-50/90 backdrop-blur supports-[backdrop-filter]:bg-sand-50/75">
-      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
+    <header className="sticky top-0 z-40 border-b border-stone-900/10 bg-sand-50/90 backdrop-blur supports-[backdrop-filter]:bg-sand-50/80">
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
         <Link href="/" className="shrink-0 rounded-lg">
           <Logo />
         </Link>
 
         <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex items-center gap-1">
+          <ul className="flex items-center gap-0.5">
             {nav.map((n) => (
               <li key={n.href}>
                 <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}
-                  className={`inline-flex min-h-11 items-center rounded-full px-3.5 text-sm font-medium transition-colors ${active(n.href) ? "bg-brand-100 text-brand-900" : "text-stone-700 hover:bg-stone-100 hover:text-stone-900"}`}>
+                  className={`relative inline-flex min-h-11 items-center px-3 text-[0.8rem] font-medium uppercase tracking-[0.14em] transition-colors after:absolute after:inset-x-3 after:bottom-2 after:h-px after:origin-left after:bg-current after:transition-transform ${active(n.href) ? "text-ink after:scale-x-100" : "text-stone-600 after:scale-x-0 hover:text-ink hover:after:scale-x-100"}`}>
                   {n.label}
                 </Link>
               </li>
@@ -38,7 +38,7 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/consultation" className="hidden min-h-11 items-center rounded-full bg-brand-800 px-5 text-sm font-semibold text-white shadow-sm transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96] sm:inline-flex">
+          <Link href="/consultation" className="hidden min-h-11 items-center rounded-full bg-clay-600 px-5 text-sm font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96] sm:inline-flex">
             Book a consultation
           </Link>
           <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-nav"
@@ -58,17 +58,17 @@ export function SiteHeader() {
       </div>
 
       <nav id="mobile-nav" aria-label="Main" hidden={!open} className="border-t border-stone-200 bg-sand-50 lg:hidden">
-        <ul className="mx-auto max-w-6xl space-y-1 px-4 py-4">
+        <ul className="mx-auto max-w-6xl px-4 pb-6 pt-2 sm:px-6">
           {nav.map((n) => (
             <li key={n.href}>
               <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}
-                className={`block rounded-xl px-4 py-3 text-base font-medium ${active(n.href) ? "bg-brand-100 text-brand-900" : "text-stone-800 hover:bg-stone-100"}`}>
+                className={`flex items-center justify-between border-b border-stone-900/10 py-4 font-display text-2xl ${active(n.href) ? "text-clay-700" : "text-ink hover:text-clay-700"}`}>
                 {n.label}
               </Link>
             </li>
           ))}
-          <li className="pt-2">
-            <Link href="/consultation" className="block rounded-full bg-brand-800 px-4 py-3.5 text-center font-semibold text-white transition-[background-color,scale] active:scale-[0.96]">Book a consultation</Link>
+          <li className="pt-6">
+            <Link href="/consultation" className="block rounded-full bg-clay-600 px-4 py-3.5 text-center font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96]">Book a consultation</Link>
           </li>
         </ul>
       </nav>

@@ -30,8 +30,8 @@ export default function AboutPage() {
       <section className="mx-auto max-w-5xl px-4 pb-12 pt-12 sm:pt-16">
         <div className="grid items-center gap-10 md:grid-cols-5">
           <div className="md:col-span-3">
-            <p className="text-sm font-semibold uppercase tracking-widest text-brand-800">About</p>
-            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{bio.headline}</h1>
+            <p className="eyebrow text-clay-700">About</p>
+            <h1 className="mt-3 text-5xl leading-[1.05] text-ink sm:text-6xl">{bio.headline}</h1>
             <p className="mt-4 text-xl text-pretty text-stone-700">{bio.short}</p>
           </div>
           {bio.photo && (
@@ -55,7 +55,7 @@ export default function AboutPage() {
         )}
 
         <div className="mt-10 flex flex-wrap gap-3">
-          <Link href="/consultation" className="rounded-full bg-brand-800 px-5 py-2.5 font-semibold text-white hover:bg-brand-900">Book a consultation</Link>
+          <Link href="/consultation" className="rounded-full bg-clay-600 px-5 py-2.5 font-semibold text-white hover:bg-clay-700">Book a consultation</Link>
           <Link href="/trips" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">See upcoming trips</Link>
           <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Instagram</a>
           <a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">TikTok</a>
@@ -67,7 +67,7 @@ export default function AboutPage() {
       {testimonials.length > 0 && (
         <section className="bg-white py-14" aria-labelledby="kind-words">
           <div className="mx-auto max-w-5xl px-4">
-            <h2 id="kind-words" className="text-2xl font-bold">Kind words</h2>
+            <h2 id="kind-words" className="text-3xl text-ink">Kind words</h2>
             <ul className="mt-6 grid gap-5 md:grid-cols-2">
               {testimonials.map((t) => (
                 <li key={t.name}>
@@ -83,10 +83,10 @@ export default function AboutPage() {
       )}
 
       <section className="mx-auto max-w-3xl px-4 py-14" aria-labelledby="faq">
-        <h2 id="faq" className="text-3xl font-bold">Questions people ask</h2>
+        <h2 id="faq" className="text-4xl text-ink">Questions people ask</h2>
         {faqs.map((topic) => (
           <div key={topic.topic} className="mt-8">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-800">{topic.topic}</h3>
+            <h3 className="eyebrow text-clay-700">{topic.topic}</h3>
             <div className="mt-3 divide-y divide-stone-200 rounded-2xl bg-white ring-1 ring-stone-200">
               {topic.items.map((f) => (
                 <details key={f.q} className="group">

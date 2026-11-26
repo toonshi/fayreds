@@ -5,7 +5,7 @@ import { Fraunces, Inter } from "next/font/google";
 import { site, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const heading = Fraunces({ subsets: ["latin"], variable: "--font-heading", display: "swap", weight: ["600", "700"] });
+const heading = Fraunces({ subsets: ["latin"], variable: "--font-heading", display: "swap", weight: ["400", "500"], style: ["normal", "italic"] });
 const body = Inter({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {

@@ -25,10 +25,22 @@
   --color-sun-600: #c46d12;
   --color-sun-700: #9b5410;
 
+  /* Clay terracotta: the main call-to-action colour (Book, Reserve, Pay). White text passes WCAG AA on 600+. */
+  --color-clay-50: #fbf3ee;
+  --color-clay-100: #f6e2d6;
+  --color-clay-200: #ecc2aa;
+  --color-clay-500: #c8643a;
+  --color-clay-600: #ad4f27;
+  --color-clay-700: #8f3f1d;
+  --color-clay-800: #6f3117;
+
   /* Warm sand: page backgrounds */
   --color-sand-50: #fbf8f3;
   --color-sand-100: #f5efe4;
   --color-sand-200: #eadfcc;
+
+  /* Ink: near-black warm text for an editorial feel */
+  --color-ink: #1f1b16;
 
   --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-heading), ui-serif, Georgia, serif;
@@ -63,15 +75,20 @@
     font-family: var(--font-sans);
   }
 
+  /* Display type: Fraunces at light weights reads premium and editorial.
+     Only 400 and 500 are loaded; font-synthesis stops browsers faking a heavier weight,
+     so older `font-bold` classes on headings simply render at 500. */
   h1, h2, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    font-synthesis: none;
   }
+  h1, h2 { font-weight: 400; }
   h1, h2, h3 { text-wrap: balance; }
   p, li, figcaption, blockquote, dd { text-wrap: pretty; }
 
   ::selection {
-    background: var(--color-sun-200);
+    background: var(--color-clay-100);
     color: var(--color-brand-950);
   }
 
@@ -88,4 +105,20 @@
     outline-color: var(--color-sun-300);
     box-shadow: none;
   }
+}
+
+/* Small uppercase label above headings: "FOR TRAVELLERS", "UPCOMING TRIPS"… */
+@utility eyebrow {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+/* Horizontal swipe rows on phones (trips) without a visible scrollbar */
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 }

@@ -17,27 +17,27 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
 }) {
   return (
     <main className="bg-sand-50 text-stone-900">
-      <div className="mx-auto grid max-w-6xl gap-10 px-4 py-12 sm:py-16 lg:grid-cols-5 lg:gap-14">
+      <div className="mx-auto grid max-w-6xl gap-10 px-5 py-12 sm:px-6 sm:py-16 lg:grid-cols-5 lg:gap-16">
         <div className="lg:col-span-2">
           <div className="lg:sticky lg:top-24">
-            <p className="text-sm font-semibold uppercase tracking-widest text-brand-700">{eyebrow}</p>
-            <h1 className="mt-2 text-4xl font-bold leading-tight sm:text-5xl">{title}</h1>
-            <p className="mt-4 text-lg leading-relaxed text-stone-700">{forms[kind].intro}</p>
+            <p className="eyebrow text-clay-700">{eyebrow}</p>
+            <h1 className="mt-3 text-4xl leading-[1.05] text-ink sm:text-6xl">{title}</h1>
+            <p className="mt-5 text-lg leading-relaxed text-stone-700">{forms[kind].intro}</p>
             {children}
-            <div className="mt-8 rounded-2xl bg-white p-6 ring-1 ring-stone-200">
-              <h2 className="font-sans text-sm font-semibold uppercase tracking-widest text-stone-600">What happens next</h2>
-              <ol className="mt-4 space-y-4">
+            <div className="mt-10 border-t border-stone-900/15 pt-6">
+              <h2 className="eyebrow font-sans text-stone-500">What happens next</h2>
+              <ol className="mt-5 space-y-5">
                 {steps.map((s, i) => (
-                  <li key={s} className="flex gap-3">
-                    <span aria-hidden className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-800 text-sm font-bold text-white">{i + 1}</span>
-                    <span className="pt-0.5 text-stone-800">{s}</span>
+                  <li key={s} className="flex gap-4">
+                    <span aria-hidden className="w-6 shrink-0 font-display text-2xl leading-none text-clay-600">{i + 1}</span>
+                    <span className="text-stone-700">{s}</span>
                   </li>
                 ))}
               </ol>
             </div>
           </div>
         </div>
-        <section aria-label="Form" className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-8 lg:col-span-3">
+        <section aria-label="Form" className="-mx-5 bg-white px-5 py-8 ring-1 ring-stone-900/10 sm:mx-0 sm:rounded-2xl sm:p-10 lg:col-span-3">
           <FormRenderer kind={kind} submitLabel={submitLabel} footnote={footnote} initialValues={initialValues} />
         </section>
       </div>
