@@ -1,26 +1,58 @@
-// OWNER: Mike. PLACEHOLDER so the frontend redirect works today.
-// TODO(Mike): M-Pesa STK push for Kenyans, Stripe card for international, waiting state,
-// then "Continue on WhatsApp / by email" after a consultation is paid.
 import { notFound } from "next/navigation";
-import { db } from "@/lib/db";
-import { quoteFor, formatMoney } from "@/lib/pricing";
+import { getPayableEnquiry } from "@/lib/payments";
+import { site, whatsappLink } from "@/lib/site";
+import PaymentFlow from "./PaymentFlow";
 
 export const dynamic = "force-dynamic";
 
-export default async function PayPage({ params }: { params: Promise<{ reference: string }> }) {
+export default async function PayPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ reference: string }>;
+  searchParams: Promise<{ confirm?: string }>;
+}) {
   const { reference } = await params;
-  const enquiry = await db.enquiry.findUnique({ where: { reference }, include: { trip: true } });
-  if (!enquiry || !["CONSULTATION", "RESERVATION"].includes(enquiry.type)) notFound();
-  const quote = quoteFor(enquiry);
+  const { confirm } = await searchParams;
+  const data = await getPayableEnquiry(reference);
+  if (!data) notFound();
+
+  const returningFromStripe = confirm === "stripe";
+  const alreadyPaid = data.latestPayment?.status === "PAID";
+  const initialMethod = returningFromStripe ? "stripe" : data.defaultMethod;
+  const resumePaymentId =
+    returningFromStripe && data.latestPayment?.provider === "STRIPE" && data.latestPayment.status === "PENDING"
+      ? data.latestPayment.id
+      : null;
+
+  const whatsappHref =
+    data.enquiryType === "CONSULTATION"
+      ? whatsappLink(`Hi Faith, I've just paid for my travel consultation with ${site.name}. My reference is ${data.reference}.`)
+      : "";
+  const mailtoHref =
+    data.enquiryType === "CONSULTATION"
+      ? `mailto:${site.email}?subject=${encodeURIComponent(`Consultation ${data.reference}`)}&body=${encodeURIComponent(
+          `Hi Faith,\n\nI've just paid for my travel consultation. My reference is ${data.reference}.\n\n${data.name}`,
+        )}`
+      : "";
 
   return (
     <main className="mx-auto max-w-lg p-8">
-      <p className="text-sm text-gray-500">Reference {enquiry.reference}</p>
-      <h1 className="mt-2 text-2xl font-bold">{quote.label}</h1>
-      <p className="mt-4 text-3xl font-semibold">{formatMoney(quote)}</p>
-      <p className="mt-6 rounded-lg bg-amber-50 p-4 text-amber-900">
-        Online payment is coming soon ({quote.currency === "KES" ? "M-Pesa" : "card"}).
-      </p>
+      <p className="text-sm text-gray-500">Reference {data.reference}</p>
+      <h1 className="mt-2 text-2xl font-bold">{data.label}</h1>
+      <PaymentFlow
+        reference={data.reference}
+        enquiryType={data.enquiryType}
+        label={data.label}
+        phone={data.phone}
+        mpesaDisplay={data.options.mpesa.display}
+        stripeDisplay={data.options.stripe.display}
+        initialMethod={initialMethod}
+        resumePaymentId={resumePaymentId}
+        alreadyPaid={alreadyPaid}
+        whatsappHref={whatsappHref}
+        mailtoHref={mailtoHref}
+      />
     </main>
   );
 }
