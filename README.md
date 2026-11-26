@@ -37,7 +37,7 @@ The work is split into **three independent workstreams**. Nobody has to wait for
 |---|---|---|
 | **Faith** | Frontend: the public website | `src/app/layout.tsx` (fonts, metadata), `src/app/(site)/**` (home page, header/footer layout, all public pages), `src/app/{icon.svg,apple-icon.tsx,opengraph-image.tsx,sitemap.ts,robots.ts}`, `src/components/**`, `src/content/**`, `src/app/globals.css`, `public/**` |
 | **Mike** | Backend: APIs, notifications, payments | `src/app/api/**`, `src/app/pay/**`, `src/lib/{enquiries,notify,sms,email,mpesa,stripe,payments,pricing}.ts` |
-| **Hendy** | Admin panel, shared contracts, deployment, integration | `prisma/**`, `src/types/**`, `src/lib/{db,site,forms,phone,auth,trips}.ts`, `src/app/admin/**`, `src/middleware.ts`, `.env.example`, Vercel/Neon setup |
+| **Hendy** | Admin panel, shared contracts, deployment, integration | `prisma/**`, `src/types/**`, `src/lib/{db,site,forms,phone,auth,trips}.ts`, `src/app/admin/**`, `src/middleware.ts`, `.env.example`, `render.yaml`, Render setup |
 
 **Rule:** if you need something changed in a folder you don't own, ask the owner. Changes to the **shared contracts**
 (`prisma/schema.prisma`, `src/lib/forms.ts`, `src/types/contracts.ts`) go through a PR that **Hendy** approves and
@@ -115,7 +115,7 @@ Owns the shared contracts, the admin dashboard Faith uses every day, and getting
 | H4 | **Enquiry detail** `/admin/enquiries/[id]`: every answer (labels from `forms.ts`), payments, private notes, status changes (NEW → IN_PROGRESS → COMPLETED / DECLINED), and one-click WhatsApp, call and email buttons | Faith can work a lead from one screen |
 | H5 | **Trips manager** `/admin/trips`: add/edit trips (dates, prices in KES and USD, deposits, spots, photo URL, highlights), publish/unpublish, and the list of travellers per trip | New trips appear on the public site without a code change |
 | H6 | **Payments list** `/admin/payments` and **CSV export** of enquiries and payments | Faith can reconcile M-Pesa and Stripe statements |
-| H7 | **Deployment:** GitHub repo, Vercel project, Neon Postgres (`DATABASE_URL` pooled + `DIRECT_URL`), `prisma migrate deploy` on build, all env vars, custom domain, Daraja callback and Stripe webhook URLs registered | The site is live on the domain over HTTPS |
+| H7 | **Deployment on Render** (see [Deployment](#deployment-render)): apply `render.yaml` (web service + Render Postgres), fill in the secrets, custom domain, daily database backups checked, Daraja callback and Stripe webhook URLs registered | The site is live on the domain over HTTPS |
 | H8 | **Integration:** merge the branches, then run the [end-to-end checklist](#end-to-end-checklist) on the live site with real keys | Every row in the checklist passes |
 | H9 | **Phase 2 (later):** a helper that collects deals from partner sites for consultations, so Faith doesn't have to search many websites by hand | Scoped after launch |
 
@@ -161,7 +161,7 @@ Trip reservation:         trip page → form → POST /api/enquiries → /pay/[r
 
 ## Getting started
 
-Requires Node 20+ and PostgreSQL (local, or a free [Neon](https://neon.tech) database).
+Requires Node 20+ and a PostgreSQL database (installed locally, or Docker: `docker run -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=fayreds postgres:16`).
 
 ```bash
 npm install
@@ -190,13 +190,42 @@ Open http://localhost:3000. `npx prisma studio` lets you browse the database.
 With no SMS, email, M-Pesa or Stripe keys in `.env`, everything runs in **demo mode**: messages and payments are printed in the
 terminal instead of being sent.
 
+## Deployment (Render)
+
+The website and the database both run on [Render](https://render.com), defined in [`render.yaml`](./render.yaml).
+
+| Piece | Render service | Plan | Approx. cost |
+|---|---|---|---|
+| Website (Next.js) | Web Service `fayreds`, Frankfurt | Starter | ~$7/month |
+| Database (PostgreSQL 16) | Postgres `fayreds-db`, Frankfurt | Basic 256 MB | ~$6/month |
+
+Why not the free plans: a free web service **sleeps after 15 minutes idle**. The first visitor waits about a minute, and M-Pesa
+payment callbacks can time out. A free database is **deleted after 30 days**.
+
+**First deploy**
+1. Render dashboard: **New**, then **Blueprint**, then connect GitHub and pick `toonshi/fayreds`, then **Apply**.
+2. When asked, fill in `ADMIN_PASSWORD` (Faith's login), `SITE_URL` (start with the `https://fayreds.onrender.com` address Render shows),
+   and any keys you already have. Leave the rest empty: those services stay in demo mode.
+3. Render builds the site, runs `prisma migrate deploy` (creates the tables), then starts it.
+4. Optional, for the sample trips: in the web service open **Shell** and run `npx prisma db seed`.
+5. Open `/admin`, log in, and check that enquiries and trips load.
+
+**After the first deploy**
+- Every push to `main` deploys automatically. Migrations run before the new version goes live.
+- **Custom domain:** web service, **Settings**, **Custom Domains**, add the domain, set the DNS records Render shows, then update `SITE_URL`.
+- **Payment callbacks:** M-Pesa callback = `SITE_URL/api/payments/mpesa/callback`. Stripe webhook = `SITE_URL/api/payments/stripe/webhook`
+  (event `checkout.session.completed`), with its signing secret in `STRIPE_WEBHOOK_SECRET`.
+- **Backups:** paid Render Postgres takes daily backups. Check **Recovery** on the database page. For an extra copy:
+  `pg_dump "<External Database URL>" > backup.sql` (copy the external URL from the database's **Connect** menu).
+- **Looking at the data from your laptop:** database, then **Networking**, then allow your IP, then use the External URL with `npx prisma studio` or any SQL client.
+
 ## Tech stack
 
 - **Next.js 15** (App Router, TypeScript) + **Tailwind CSS 4**
-- **PostgreSQL** with **Prisma**: Neon in production
+- **PostgreSQL** with **Prisma**: Render Postgres in production
 - **Africa's Talking**: SMS · **Nodemailer** (Gmail SMTP): email
 - **Safaricom Daraja**: M-Pesa STK push · **Stripe Checkout**: cards
-- Hosted on **Vercel**
+- Hosted on **Render** (web service + Postgres, defined in `render.yaml`)
 
 ## Environment variables
 
