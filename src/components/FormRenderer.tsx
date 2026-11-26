@@ -1,7 +1,7 @@
 "use client";
 // OWNER: Faith. Renders any form defined in src/lib/forms.ts and submits it to POST /api/enquiries
 // (contract: src/types/contracts.ts). One component for Marketing, Consultation, Partnership and Reservation.
-import { useEffect, useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { COUNTRIES, forms, validate, type Field, type FormKind } from "@/lib/forms";
 import type { EnquiryRequest, EnquiryResponse } from "@/types/contracts";
@@ -48,7 +48,30 @@ export function FormRenderer({ kind, tripSlug, submitLabel = "Send", footnote, i
   const [message, setMessage] = useState<string>();
   const [sending, setSending] = useState(false);
   const [dirty, setDirty] = useState(false);
+  // pagination: one section per step
+  const [step, setStep] = useState(0);
+  const paged = sections.length > 1;
+  const lastStep = step === sections.length - 1;
+  const stepTop = useRef<HTMLDivElement>(null);
+  const pendingFocus = useRef<string | null>(null); // "step" or the id of a field
   const fid = (name: string) => `${uid}-${name}`;
+  const controlId = (f: Field) => (f.type === "multi" ? `${fid(f.name)}-0` : fid(f.name));
+
+  // after a step change: move focus to the step heading (or to the first field with an error)
+  useEffect(() => {
+    const target = pendingFocus.current;
+    if (!target) return;
+    pendingFocus.current = null;
+    if (target === "step") {
+      const el = stepTop.current;
+      if (!el) return;
+      // 112px = the sticky site header + breathing room (matches scroll-mt-28 below)
+      if (el.getBoundingClientRect().top < 112) el.scrollIntoView({ block: "start" });
+      el.focus({ preventScroll: true });
+    } else {
+      document.getElementById(target)?.focus();
+    }
+  }, [step]);
 
   // warn before leaving a half-filled form
   useEffect(() => {
@@ -80,24 +103,55 @@ export function FormRenderer({ kind, tripSlug, submitLabel = "Send", footnote, i
     const n = Object.keys(errs).length;
     setMessage(n ? `Please fix ${n} field${n === 1 ? "" : "s"} to continue.` : fallback);
     const first = fields.find((f) => errs[f.name]);
-    if (first) document.getElementById(first.type === "multi" ? `${fid(first.name)}-0` : fid(first.name))?.focus();
+    if (!first) return;
+    // the error may be on an earlier step (e.g. the server rejected something): go there first
+    const errStep = sections.findIndex((s) => s.fields.some((x) => x.name === first.name));
+    if (errStep !== step) {
+      pendingFocus.current = controlId(first);
+      setStep(errStep);
+    } else document.getElementById(controlId(first))?.focus();
   }
 
-  async function submit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function payloadOf(list: Field[]) {
     const payload: EnquiryRequest["values"] = {};
-    for (const f of fields) {
+    for (const f of list) {
       const v = values[f.name];
       if (v === undefined || v === "") continue;
       payload[f.name] = f.type === "number" ? Number(v) : v;
     }
-    // same rules as the server, checked here first so people don't wait for a round trip
-    const local = validate(kind, payload);
+    return payload;
+  }
+
+  /** Same rules as the server, checked here first so people don't wait for a round trip. Only returns errors for `list`. */
+  function localErrors(list: Field[]) {
+    const payload = payloadOf(fields);
+    const all = validate(kind, payload).errors;
     for (const f of fields) {
       const n = payload[f.name];
-      if (f.type === "number" && typeof n === "number" && f.max != null && n > f.max) local.errors[f.name] = `Enter a number up to ${f.max}`;
+      if (f.type === "number" && typeof n === "number" && f.max != null && n > f.max) all[f.name] = `Enter a number up to ${f.max}`;
     }
-    if (Object.keys(local.errors).length) return showErrors(local.errors);
+    const errs: Record<string, string> = {};
+    for (const f of list) if (all[f.name]) errs[f.name] = all[f.name];
+    return errs;
+  }
+
+  function goToStep(i: number) {
+    setMessage(undefined);
+    pendingFocus.current = "step";
+    setStep(i);
+  }
+
+  async function submit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (paged && !lastStep) {
+      // "Continue" (or Enter in a field): check this step only, then move on
+      const errs = localErrors(sections[step].fields);
+      if (Object.keys(errs).length) return showErrors(errs);
+      return goToStep(step + 1);
+    }
+    const payload = payloadOf(fields);
+    const local = localErrors(fields);
+    if (Object.keys(local).length) return showErrors(local);
 
     setSending(true);
     setMessage(undefined);
@@ -182,10 +236,41 @@ export function FormRenderer({ kind, tripSlug, submitLabel = "Send", footnote, i
         <label>Leave this empty <input name="website_url" tabIndex={-1} autoComplete="off" /></label>
       </div>
 
+      {paged && (
+        <div ref={stepTop} tabIndex={-1} className="scroll-mt-28 outline-none focus-visible:shadow-none" aria-label={`Step ${step + 1} of ${sections.length}: ${sections[step].title}`}>
+          <p aria-hidden className="text-sm font-semibold uppercase tracking-widest text-brand-700">
+            Step {step + 1} of {sections.length}
+          </p>
+          <ol className="mt-3 grid gap-2" style={{ gridTemplateColumns: `repeat(${sections.length}, minmax(0, 1fr))` }}>
+            {sections.map((s, i) => {
+              const bar = (
+                <>
+                  <span aria-hidden className={`block h-1.5 rounded-full transition-colors duration-300 ${i <= step ? "bg-brand-800" : "bg-stone-200"}`} />
+                  <span className={`mt-2 hidden text-left text-sm sm:block ${i === step ? "font-semibold text-stone-900" : "text-stone-600"}`}>{s.title}</span>
+                </>
+              );
+              return (
+                <li key={s.title} aria-current={i === step ? "step" : undefined}>
+                  {i < step ? (
+                    // earlier steps can be revisited
+                    <button type="button" onClick={() => goToStep(i)} className="block w-full rounded-md text-left hover:opacity-75">
+                      {bar}
+                      <span className="sr-only">Back to step {i + 1}: {s.title}</span>
+                    </button>
+                  ) : (
+                    <div>{bar}<span className="sr-only">Step {i + 1}: {s.title}</span></div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      )}
+
       {message && <p role="alert" className="rounded-xl bg-rose-50 p-3.5 text-sm font-medium text-rose-800 ring-1 ring-rose-200">{message}</p>}
 
-      {sections.map((s) => (
-        <fieldset key={s.title}>
+      {sections.map((s, i) => (
+        <fieldset key={s.title} hidden={paged && i !== step}>
           <legend className={compact && sections.length === 1 ? "sr-only" : "mb-4 font-display text-xl font-semibold text-stone-900"}>{s.title}</legend>
           <div className="grid gap-x-4 gap-y-5 sm:grid-cols-2">
             {s.fields.map((f) => {
@@ -209,13 +294,21 @@ export function FormRenderer({ kind, tripSlug, submitLabel = "Send", footnote, i
         </fieldset>
       ))}
 
-      {renderSummary?.(values)}
+      {lastStep && renderSummary?.(values)}
 
       <div>
-        <button disabled={sending} className="min-h-12 w-full rounded-full bg-brand-800 px-7 font-semibold text-white shadow-sm transition-[background-color,scale] hover:bg-brand-900 active:not-disabled:scale-[0.96] disabled:opacity-60 sm:w-auto sm:min-w-56">
-          {sending ? "Sending…" : submitLabel}
-        </button>
-        {footnote && <p className="mt-3 text-sm text-stone-600">{footnote}</p>}
+        <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
+          {paged && step > 0 && (
+            <button type="button" onClick={() => goToStep(step - 1)} disabled={sending}
+              className="min-h-12 w-full rounded-full border border-stone-300 bg-white px-6 font-semibold text-stone-800 transition-[background-color,border-color,scale] hover:border-stone-400 hover:bg-sand-50 active:not-disabled:scale-[0.96] disabled:opacity-60 sm:w-auto">
+              Back
+            </button>
+          )}
+          <button disabled={sending} className={`min-h-12 w-full rounded-full bg-brand-800 px-7 font-semibold text-white shadow-sm transition-[background-color,scale] hover:bg-brand-900 active:not-disabled:scale-[0.96] disabled:opacity-60 sm:w-auto sm:min-w-56 ${paged ? "sm:ml-auto" : ""}`}>
+            {sending ? "Sending…" : lastStep ? submitLabel : "Continue"}
+          </button>
+        </div>
+        {lastStep && footnote && <p className={`mt-3 text-sm text-stone-600 ${paged ? "sm:text-right" : ""}`}>{footnote}</p>}
       </div>
     </form>
   );
