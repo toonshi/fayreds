@@ -1,10 +1,12 @@
 // OWNER: Faith. /about: bio, testimonials (when there are real ones) and FAQ.
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { site, siteUrl, whatsappLink } from "@/lib/site";
 import { bio } from "@/content/bio";
 import { testimonials } from "@/content/testimonials";
 import { faqs } from "@/content/faq";
+import { Recognition } from "@/components/Recognition";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -24,11 +26,19 @@ export default function AboutPage() {
     <main className="bg-sand-50 text-stone-900">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/</g, "\\u003c") }} />
 
-      <section className="mx-auto max-w-3xl px-4 pb-12 pt-12 sm:pt-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-brand-800">About</p>
-        <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{bio.headline}</h1>
-        <p className="mt-4 text-xl text-stone-700">{bio.short}</p>
-        <div className="mt-8 space-y-4 text-lg leading-relaxed text-stone-700">
+      <section className="mx-auto max-w-5xl px-4 pb-12 pt-12 sm:pt-16">
+        <div className="grid items-center gap-10 md:grid-cols-5">
+          <div className="md:col-span-3">
+            <p className="text-sm font-semibold uppercase tracking-widest text-brand-800">About</p>
+            <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{bio.headline}</h1>
+            <p className="mt-4 text-xl text-pretty text-stone-700">{bio.short}</p>
+          </div>
+          {bio.photo && (
+            <Image src={bio.photo} alt={bio.photoAlt} width={1280} height={1280} priority sizes="(min-width: 768px) 360px, 90vw"
+              className="aspect-square w-full rounded-[2rem] object-cover outline outline-1 -outline-offset-1 outline-black/10 shadow-xl md:col-span-2" />
+          )}
+        </div>
+        <div className="mt-10 max-w-3xl space-y-4 text-lg leading-relaxed text-pretty text-stone-700">
           {bio.long.map((p) => <p key={p}>{p}</p>)}
         </div>
 
@@ -50,6 +60,8 @@ export default function AboutPage() {
           <a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">TikTok</a>
         </div>
       </section>
+
+      <Recognition headingLevel={2} />
 
       {testimonials.length > 0 && (
         <section className="bg-white py-14" aria-labelledby="kind-words">

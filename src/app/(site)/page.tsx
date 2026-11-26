@@ -1,4 +1,5 @@
 // OWNER: Faith. Home page.
+import Image from "next/image";
 import Link from "next/link";
 import { getPublishedTrips, spotsLeft } from "@/lib/trips";
 import { site, whatsappLink } from "@/lib/site";
@@ -8,6 +9,7 @@ import { TripCard } from "@/components/TripCard";
 import { Price } from "@/components/currency";
 import { LogoMark } from "@/components/Logo";
 import { SocialIcons } from "@/components/SocialIcons";
+import { Recognition } from "@/components/Recognition";
 
 export const dynamic = "force-dynamic";
 
@@ -87,34 +89,32 @@ export default async function HomePage() {
           </div>
 
           <div className="relative mx-auto w-full max-w-md lg:max-w-none">
-            {bio.photo ? (
-              // eslint-disable-next-line @next/next/no-img-element -- local portrait
-              <img src={bio.photo} alt={`${site.owner}, founder of ${site.name}`} className="aspect-[4/5] w-full rounded-[2rem] object-cover shadow-xl" />
-            ) : (
-              <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sun-200 via-sun-300 to-brand-700 shadow-xl">
-                <div aria-hidden className="absolute left-1/2 top-[38%] h-48 w-48 -translate-x-1/2 rounded-full bg-sun-400" />
-                <div aria-hidden className="absolute inset-x-0 bottom-0 h-[48%] bg-brand-800" />
-                <svg aria-hidden viewBox="0 0 400 120" className="absolute inset-x-0 top-[50%] w-full" preserveAspectRatio="none">
-                  <path d="M0 40 C60 10 120 10 180 40 S300 70 400 30" fill="none" stroke="#fff" strokeWidth="8" strokeLinecap="round" />
-                  <path d="M40 90 C100 65 150 65 210 90 S320 110 380 85" fill="none" stroke="#7fc9bf" strokeWidth="8" strokeLinecap="round" />
-                </svg>
-                <div className="absolute inset-x-6 bottom-6 rounded-2xl bg-white/95 p-4 shadow-lg">
-                  <p className="text-sm text-stone-600">Next trip</p>
-                  {trips[0] ? (
-                    <Link href={`/trips/${trips[0].slug}`} className="font-display text-lg font-semibold text-stone-900 hover:underline">
-                      {trips[0].title}
-                    </Link>
-                  ) : (
-                    <p className="font-display text-lg font-semibold">New trips coming soon</p>
-                  )}
-                </div>
+            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sun-200 via-sun-300 to-brand-700 shadow-xl">
+              {bio.photo ? (
+                <Image src={bio.photo} alt={bio.photoAlt} fill priority sizes="(min-width: 1024px) 560px, 90vw"
+                  className="object-cover object-[50%_30%]" />
+              ) : (
+                <>
+                  <div aria-hidden className="absolute left-1/2 top-[38%] h-48 w-48 -translate-x-1/2 rounded-full bg-sun-400" />
+                  <div aria-hidden className="absolute inset-x-0 bottom-0 h-[48%] bg-brand-800" />
+                </>
+              )}
+              <div className="absolute inset-x-5 bottom-5 rounded-2xl bg-white/95 p-4 shadow-lg backdrop-blur">
+                <p className="text-sm text-stone-600">Next trip</p>
+                {trips[0] ? (
+                  <Link href={`/trips/${trips[0].slug}`} className="font-display text-lg font-semibold text-stone-900 hover:underline">
+                    {trips[0].title}
+                  </Link>
+                ) : (
+                  <p className="font-display text-lg font-semibold">New trips coming soon</p>
+                )}
               </div>
-            )}
+            </div>
             <div className="absolute -left-4 top-8 hidden rounded-2xl bg-white p-3 shadow-lg ring-1 ring-stone-100 sm:flex sm:items-center sm:gap-3">
               <LogoMark className="h-10 w-10" />
               <div className="pr-2 text-sm">
-                <p className="font-semibold text-stone-900">Kenya → the world</p>
-                <p className="text-stone-600">Kenyan & international clients</p>
+                <p className="font-semibold text-stone-900">Top 100 in African travel</p>
+                <p className="text-stone-600">Most Impactful People 2025</p>
               </div>
             </div>
           </div>
@@ -163,6 +163,8 @@ export default async function HomePage() {
           </ul>
         </div>
       </section>
+
+      <Recognition tone="sand" />
 
       {/* ---------- Upcoming trips ---------- */}
       {trips.length > 0 && (
