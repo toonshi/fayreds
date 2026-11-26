@@ -126,7 +126,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
             <li key={e.id} className="rounded-xl bg-white p-4 ring-1 ring-stone-200">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <Link href={`/admin/enquiries/${e.id}`} className="inline-flex min-h-11 items-center font-semibold text-teal-800 underline-offset-2 hover:underline">{e.name}</Link>
+                  <p className="font-semibold text-stone-900">{e.name}</p>
                   <p className="text-xs text-stone-600">{e.country} · <span className="tabular-nums">{fmtDateTime(e.createdAt)}</span></p>
                 </div>
                 <Badge className={statusColor[e.status]}>{statusLabel(e.status)}</Badge>
@@ -139,7 +139,7 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
               <p className="mt-2 text-sm text-stone-800">{summaryLine(e.type, e.details, e.trip, e.spots) || "No details"}</p>
               <div className="mt-3 flex items-center justify-between gap-2">
                 <ContactButtons compact name={e.name} phone={e.phone} email={e.email} reference={e.reference} what={typeLabel(e.type).toLowerCase()} pref={pref} />
-                <Link href={`/admin/enquiries/${e.id}`} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-teal-800 hover:bg-teal-50">Open →</Link>
+                <Link href={`/admin/enquiries/${e.id}`} className="inline-flex min-h-11 items-center rounded-lg px-3 text-sm font-semibold text-teal-800 hover:bg-teal-50">View →</Link>
               </div>
             </li>
           );
