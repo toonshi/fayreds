@@ -3,18 +3,18 @@
 /* OWNER: Faith. Fayreds Travel brand tokens: change a colour here and it changes everywhere.
    Use them as Tailwind classes: bg-brand-800, text-sun-400, font-display, etc. */
 @theme {
-  /* Deep wine red: the main brand colour (dark panels, headings accents, links, the logo) */
-  --color-brand-50: #fdf3f4;
-  --color-brand-100: #fbe3e5;
-  --color-brand-200: #f5c2c7;
-  --color-brand-300: #ec97a0;
-  --color-brand-400: #dd6472;
-  --color-brand-500: #c43f4f;
-  --color-brand-600: #a32b3b;
-  --color-brand-700: #852232;
-  --color-brand-800: #6b1c2b;
-  --color-brand-900: #4f1420;
-  --color-brand-950: #2e0a12;
+  /* Kanga black: warm near-black for dark sections, text accents and the logo */
+  --color-brand-50: #f7f1ea;
+  --color-brand-100: #ede3d6;
+  --color-brand-200: #d9c8b4;
+  --color-brand-300: #b9a189;
+  --color-brand-400: #8f765f;
+  --color-brand-500: #6d5643;
+  --color-brand-600: #523f31;
+  --color-brand-700: #3d2e24;
+  --color-brand-800: #2b201a;
+  --color-brand-900: #1f1713;
+  --color-brand-950: #140e0b;
 
   /* Sunset amber: highlights, the sun in the logo, small accents (not for text on white) */
   --color-sun-100: #fdf0d8;
@@ -25,7 +25,7 @@
   --color-sun-600: #c46d12;
   --color-sun-700: #9b5410;
 
-  /* Bright red: the main call-to-action colour (Book, Reserve, Pay). White text passes WCAG AA on 600+. */
+  /* Kanga red: the main colour (buttons, borders, sayings). White text passes WCAG AA on 600+. */
   --color-clay-50: #fdf2f2;
   --color-clay-100: #fbe1e1;
   --color-clay-200: #f2b8b8;
@@ -34,10 +34,10 @@
   --color-clay-700: #921d24;
   --color-clay-800: #6e161b;
 
-  /* Warm sand: page backgrounds */
-  --color-sand-50: #fbf8f3;
-  --color-sand-100: #f5efe4;
-  --color-sand-200: #eadfcc;
+  /* Cream: page backgrounds, like unprinted kanga cotton */
+  --color-sand-50: #fbf3e4;
+  --color-sand-100: #f4e8d2;
+  --color-sand-200: #e8d6b6;
 
   /* Ink: near-black warm text for an editorial feel */
   --color-ink: #1f1b16;
@@ -75,15 +75,12 @@
     font-family: var(--font-sans);
   }
 
-  /* Display type: Fraunces at light weights reads premium and editorial.
-     Only 400 and 500 are loaded; font-synthesis stops browsers faking a heavier weight,
-     so older `font-bold` classes on headings simply render at 500. */
+  /* Display type: Bricolage Grotesque, bold and a little hand-made, like kanga lettering */
   h1, h2, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
-    font-synthesis: none;
+    letter-spacing: -0.02em;
   }
-  h1, h2 { font-weight: 400; }
+  h1, h2 { font-weight: 700; }
   h1, h2, h3 { text-wrap: balance; }
   p, li, figcaption, blockquote, dd { text-wrap: pretty; }
 
@@ -95,7 +92,7 @@
   button:not(:disabled), summary, [role="button"], label:has(> input[type="checkbox"]) { cursor: pointer; }
   a, button, summary, label, input, select, textarea { touch-action: manipulation; }
 
-  /* Two-tone focus ring: dark teal line + amber halo, visible (≥3:1) on sand, white and teal */
+  /* Two-tone focus ring: dark line + gold halo, visible (≥3:1) on cream, white and black */
   :focus-visible {
     outline: 2px solid var(--color-brand-800);
     outline-offset: 2px;
@@ -107,14 +104,52 @@
   }
 }
 
-/* Small uppercase label above headings: "FOR TRAVELLERS", "UPCOMING TRIPS"… */
+/* Small label above headings, led by a red kanga diamond. Sentence case on purpose. */
 @utility eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: var(--font-sans);
-  font-size: 0.75rem;
-  line-height: 1rem;
+  font-size: 0.95rem;
+  line-height: 1.25rem;
   font-weight: 600;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
+  &::before {
+    content: "";
+    width: 0.6rem;
+    height: 0.6rem;
+    flex-shrink: 0;
+    background: var(--color-clay-600);
+    transform: rotate(45deg);
+  }
+}
+
+/* Pindo: the printed border of a kanga. Use on a thin full-width div (h-3 to h-5). */
+@utility pindo {
+  background-color: var(--color-brand-900);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16' viewBox='0 0 28 16'%3E%3Cpath d='M0 8 7 1l7 7-7 7z' fill='%23b3242c'/%3E%3Cpath d='M14 8l7-7 7 7-7 7z' fill='%23f2a541'/%3E%3Ccircle cx='7' cy='8' r='2' fill='%23fbf3e4'/%3E%3Ccircle cx='21' cy='8' r='2' fill='%23140e0b'/%3E%3C/svg%3E");
+  background-size: auto 100%;
+  background-repeat: repeat-x;
+}
+
+/* Lighter red-and-gold dotted pindo for cream backgrounds */
+@utility pindo-dots {
+  background-image: radial-gradient(circle, var(--color-clay-600) 2.5px, transparent 3px), radial-gradient(circle, var(--color-sun-400) 2.5px, transparent 3px);
+  background-size: 18px 100%, 18px 100%;
+  background-position: 0 50%, 9px 50%;
+  background-repeat: repeat-x;
+}
+
+/* Mji: the faint centre motif of a kanga, as a background */
+@utility mji {
+  background-image: repeating-radial-gradient(circle at 50% 45%, transparent 0 22px, rgb(179 36 44 / 0.07) 22px 24px);
+}
+
+/* Block-print button: square-ish with a hard offset shadow that presses in on click */
+@utility btn-kanga {
+  border-radius: 0.375rem;
+  box-shadow: 4px 4px 0 var(--color-brand-950);
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 150ms ease;
+  &:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--color-brand-950); }
 }
 
 /* Horizontal swipe rows on phones (trips) without a visible scrollbar */

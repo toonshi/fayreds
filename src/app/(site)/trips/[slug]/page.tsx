@@ -139,10 +139,10 @@ export default async function TripPage({ params }: Params) {
               {left === 0 ? "Fully booked" : `${left} of ${trip.totalSpots} spots left`}
             </p>
             {left > 0 && (
-              <a href="#reserve" className="block rounded-full bg-clay-600 px-6 py-3 text-center font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96]">Reserve a spot</a>
+              <a href="#reserve" className="btn-kanga block bg-clay-600 px-6 py-3 text-center font-semibold text-white hover:bg-clay-700">Reserve a spot</a>
             )}
             <a href={whatsappLink(`Hi Faith, I have a question about ${trip.title}.`)} target="_blank" rel="noreferrer"
-              className="block rounded-full px-6 py-3 text-center font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Ask Faith a question</a>
+              className="block rounded-md px-6 py-3 text-center font-medium ring-2 ring-brand-900 bg-white hover:bg-brand-50">Ask Faith a question</a>
           </div>
         </aside>
       </div>
@@ -157,10 +157,10 @@ export default async function TripPage({ params }: Params) {
             </p>
           </div>
           {left > 0 ? (
-            <a href="#reserve" className="inline-flex min-h-12 items-center rounded-full bg-clay-600 px-6 font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96]">Reserve spot</a>
+            <a href="#reserve" className="btn-kanga inline-flex min-h-12 items-center bg-clay-600 px-6 font-semibold text-white hover:bg-clay-700">Reserve spot</a>
           ) : (
             <a href={whatsappLink(`Hi Faith, please add me to the waiting list for ${trip.title}.`)} target="_blank" rel="noreferrer"
-              className="inline-flex min-h-12 items-center rounded-full bg-brand-800 px-5 font-semibold text-white">Join waiting list</a>
+              className="btn-kanga inline-flex min-h-12 items-center bg-sun-400 px-5 font-semibold text-brand-950">Join waiting list</a>
           )}
         </div>
       </div>

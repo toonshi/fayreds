@@ -8,11 +8,12 @@ import { SocialIcons } from "./SocialIcons";
 export function SiteFooter() {
   return (
     <footer className="bg-brand-950 text-brand-100">
+      <div aria-hidden className="pindo h-4" />
       <div className="mx-auto flex max-w-6xl flex-col gap-6 border-b border-white/10 px-4 py-14 sm:px-6 md:flex-row md:items-end md:justify-between">
-        <p className="max-w-xl font-display text-3xl leading-tight text-white sm:text-4xl">
-          Where to next? <em className="text-sun-300">Let&apos;s plan it together.</em>
+        <p className="max-w-xl font-display text-4xl font-bold leading-tight text-white sm:text-5xl">
+          <span lang="sw" className="text-sun-300">Twende!</span> Where to next?
         </p>
-        <Link href="/consultation" className="inline-flex min-h-12 shrink-0 items-center justify-center rounded-full bg-clay-600 px-7 font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:scale-[0.96]">
+        <Link href="/consultation" className="btn-kanga inline-flex min-h-12 shrink-0 items-center justify-center bg-clay-600 px-7 font-semibold text-white hover:bg-clay-700">
           Book a consultation
         </Link>
       </div>

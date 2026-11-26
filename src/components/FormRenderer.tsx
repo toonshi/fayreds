@@ -311,11 +311,11 @@ export function FormRenderer({ kind, tripSlug, submitLabel = "Send", footnote, i
         <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center">
           {stepped && step > 0 && (
             <button type="button" onClick={() => goTo(step - 1)}
-              className="min-h-12 rounded-full px-6 font-semibold text-ink ring-1 ring-stone-300 transition-[background-color,scale] hover:bg-sand-100 active:scale-[0.96]">
+              className="min-h-12 rounded-md px-6 font-semibold text-ink ring-2 ring-brand-900 hover:bg-sand-100">
               Back
             </button>
           )}
-          <button disabled={sending} className="min-h-12 w-full rounded-full bg-clay-600 px-7 font-semibold text-white transition-[background-color,scale] hover:bg-clay-700 active:not-disabled:scale-[0.96] disabled:opacity-60 sm:w-auto sm:min-w-56">
+          <button disabled={sending} className="btn-kanga min-h-12 w-full bg-clay-600 px-7 font-semibold text-white hover:bg-clay-700 disabled:opacity-60 sm:w-auto sm:min-w-56">
             {sending ? "Sending…" : last ? submitLabel : `Continue to ${sections[step + 1].title.toLowerCase()}`}
           </button>
         </div>

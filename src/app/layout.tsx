@@ -1,12 +1,12 @@
 // OWNER: Faith. Root layout: fonts, site-wide metadata. Header/footer live in app/(site)/layout.tsx
 // so the admin panel and payment pages keep their own simpler chrome.
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { Bricolage_Grotesque, DM_Sans } from "next/font/google";
 import { site, siteUrl } from "@/lib/site";
 import "./globals.css";
 
-const heading = Fraunces({ subsets: ["latin"], variable: "--font-heading", display: "swap", weight: ["400", "500"], style: ["normal", "italic"] });
-const body = Inter({ subsets: ["latin"], variable: "--font-body", display: "swap" });
+const heading = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-heading", display: "swap" });
+const body = DM_Sans({ subsets: ["latin"], variable: "--font-body", display: "swap" });
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#fbf8f3" }; // matches the sand page background
+export const viewport: Viewport = { themeColor: "#fbf3e4" }; // matches the cream page background
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

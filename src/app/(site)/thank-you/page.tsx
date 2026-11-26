@@ -27,7 +27,7 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
     <main className="flex min-h-[80vh] items-center bg-sand-50 px-4 py-16 text-stone-900">
       <div className="mx-auto w-full max-w-xl rounded-2xl bg-white p-8 text-center ring-1 ring-stone-900/10 sm:p-12">
         <div aria-hidden className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-700"><Icon name="check" className="h-8 w-8" /></div>
-        <h1 className="mt-6 text-4xl text-ink sm:text-5xl">Thank you, <em className="text-clay-700">we&apos;ve got it</em></h1>
+        <h1 className="mt-6 text-4xl text-ink sm:text-5xl">Thank you, we&apos;ve got it</h1>
         <p className="mt-3 text-stone-600">Your {c.what} has been received. {c.next}</p>
 
         {valid && (
@@ -38,9 +38,9 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
         )}
 
         <ol className="mx-auto mt-8 max-w-xs space-y-3 text-left text-sm" aria-label="What happens next">
-          <li className="flex items-center gap-3 text-ink"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-brand-800 text-white"><Icon name="check" className="h-3.5 w-3.5" /></span>Request received</li>
-          <li className="flex items-center gap-3 text-stone-600"><span className="h-6 w-6 rounded-full ring-1 ring-stone-300" aria-hidden />Faith reviews it personally</li>
-          <li className="flex items-center gap-3 text-stone-600"><span className="h-6 w-6 rounded-full ring-1 ring-stone-300" aria-hidden />She gets back to you</li>
+          <li className="flex items-center gap-3 text-ink"><span className="btn-kanga flex h-6 w-6 items-center justify-center bg-sun-400 text-brand-950"><Icon name="check" className="h-3.5 w-3.5" /></span>Request received</li>
+          <li className="flex items-center gap-3 text-stone-600"><span className="h-6 w-6 rounded-md ring-2 ring-brand-900" aria-hidden />Faith reviews it personally</li>
+          <li className="flex items-center gap-3 text-stone-600"><span className="h-6 w-6 rounded-md ring-2 ring-brand-900" aria-hidden />She gets back to you</li>
         </ol>
 
         <p className="mt-8 text-sm text-stone-500">
@@ -49,8 +49,8 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
 
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <a href={whatsappLink(`Hi Faith, following up on my ${c.what}${valid ? ` (${valid})` : ""}.`)} target="_blank" rel="noreferrer"
-            className="rounded-full bg-brand-800 px-6 py-3 font-semibold text-white transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96]">Message Faith on WhatsApp</a>
-          <Link href="/" className="rounded-full px-6 py-3 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Back to home</Link>
+            className="btn-kanga bg-sun-400 px-6 py-3 font-semibold text-brand-950 hover:bg-sun-300">Message Faith on WhatsApp</a>
+          <Link href="/" className="rounded-md px-6 py-3 font-medium ring-2 ring-brand-900 bg-white hover:bg-brand-50">Back to home</Link>
         </div>
 
         <div className="mt-10 border-t border-stone-100 pt-6">
