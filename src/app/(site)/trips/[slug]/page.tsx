@@ -7,6 +7,7 @@ import { siteUrl, whatsappLink } from "@/lib/site";
 import { Price, CurrencyToggle } from "@/components/currency";
 import { ReservationForm } from "@/components/ReservationForm";
 import { TripImage } from "@/components/TripImage";
+import { Icon } from "@/components/Icon";
 import { nights, tripDates } from "@/components/trip-format";
 
 export const dynamic = "force-dynamic";
@@ -50,13 +51,13 @@ export default async function TripPage({ params }: Params) {
 
       <div className="mx-auto max-w-6xl px-4 pt-6">
         <nav aria-label="Breadcrumb" className="text-sm text-stone-500">
-          <Link href="/trips" className="hover:text-stone-900 hover:underline">← All trips</Link>
+          <Link href="/trips" className="-ml-1 inline-flex min-h-11 items-center gap-1 px-1 hover:text-stone-900 hover:underline"><Icon name="arrowLeft" /> All trips</Link>
         </nav>
       </div>
 
       <header className="mx-auto mt-4 max-w-6xl px-4">
-        <div className="relative aspect-[16/9] overflow-hidden rounded-3xl sm:aspect-[21/9]">
-          <TripImage src={trip.imageUrl} alt={trip.destination} seed={trip.slug} />
+        <div className="relative aspect-[16/9] overflow-hidden rounded-3xl sm:aspect-[3/1]">
+          <TripImage src={trip.imageUrl} alt={trip.destination} seed={trip.slug} priority showLabel={false} />
         </div>
         <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
           <div>
@@ -81,7 +82,7 @@ export default async function TripPage({ params }: Params) {
               <ul className="mt-4 grid gap-3 sm:grid-cols-2">
                 {trip.highlights.map((h) => (
                   <li key={h} className="flex gap-3 rounded-xl bg-white p-4 ring-1 ring-stone-200">
-                    <span aria-hidden className="text-amber-500">★</span><span>{h}</span>
+                    <Icon name="star" className="mt-0.5 h-5 w-5 text-sun-500" /><span>{h}</span>
                   </li>
                 ))}
               </ul>
@@ -93,7 +94,7 @@ export default async function TripPage({ params }: Params) {
               <h2 className="text-xl font-bold">What&apos;s included</h2>
               <ul className="mt-4 space-y-2">
                 {trip.includes.map((x) => (
-                  <li key={x} className="flex gap-3"><span aria-hidden className="font-bold text-brand-700">✓</span><span>{x}</span></li>
+                  <li key={x} className="flex gap-3"><Icon name="check" className="mt-1 h-4 w-4 text-brand-700" /><span>{x}</span></li>
                 ))}
               </ul>
             </section>
@@ -128,7 +129,7 @@ export default async function TripPage({ params }: Params) {
               <p className="text-sm text-stone-500">Price per person</p>
               <Price kes={trip.priceKes} usd={trip.priceUsd} className="text-3xl font-bold" />
             </div>
-            <div className="rounded-xl bg-stone-50 p-4 text-sm">
+            <div className="rounded-xl bg-sand-50 p-4 text-sm">
               <p>Reserve with a deposit of <Price kes={trip.depositKes} usd={trip.depositUsd} className="font-semibold" /> per person.</p>
               <p className="mt-1 text-stone-600">Kenyans pay by M-Pesa, international guests by card.</p>
             </div>
@@ -136,10 +137,10 @@ export default async function TripPage({ params }: Params) {
               {left === 0 ? "Fully booked" : `${left} of ${trip.totalSpots} spots left`}
             </p>
             {left > 0 && (
-              <a href="#reserve" className="block rounded-full bg-brand-800 px-6 py-3 text-center font-semibold text-white hover:bg-brand-900">Reserve a spot</a>
+              <a href="#reserve" className="block rounded-full bg-brand-800 px-6 py-3 text-center font-semibold text-white transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96]">Reserve a spot</a>
             )}
             <a href={whatsappLink(`Hi Faith, I have a question about ${trip.title}.`)} target="_blank" rel="noreferrer"
-              className="block rounded-full border border-stone-300 px-6 py-3 text-center font-medium hover:bg-stone-50">Ask Faith a question</a>
+              className="block rounded-full px-6 py-3 text-center font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Ask Faith a question</a>
           </div>
         </aside>
       </div>

@@ -7,6 +7,7 @@ import { bio } from "@/content/bio";
 import { testimonials } from "@/content/testimonials";
 import { faqs } from "@/content/faq";
 import { Recognition } from "@/components/Recognition";
+import { Icon } from "@/components/Icon";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
@@ -55,9 +56,9 @@ export default function AboutPage() {
 
         <div className="mt-10 flex flex-wrap gap-3">
           <Link href="/consultation" className="rounded-full bg-brand-800 px-5 py-2.5 font-semibold text-white hover:bg-brand-900">Book a consultation</Link>
-          <Link href="/trips" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">See upcoming trips</Link>
-          <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">Instagram</a>
-          <a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">TikTok</a>
+          <Link href="/trips" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">See upcoming trips</Link>
+          <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Instagram</a>
+          <a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">TikTok</a>
         </div>
       </section>
 
@@ -70,7 +71,7 @@ export default function AboutPage() {
             <ul className="mt-6 grid gap-5 md:grid-cols-2">
               {testimonials.map((t) => (
                 <li key={t.name}>
-                  <figure className="h-full rounded-2xl bg-stone-50 p-6 ring-1 ring-stone-200">
+                  <figure className="h-full rounded-2xl bg-sand-50 p-6 ring-1 ring-stone-200">
                     <blockquote className="text-stone-800">&ldquo;{t.quote}&rdquo;</blockquote>
                     <figcaption className="mt-4 text-sm"><span className="font-semibold">{t.name}</span> · <span className="text-stone-500">{t.context}</span></figcaption>
                   </figure>
@@ -88,12 +89,12 @@ export default function AboutPage() {
             <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-800">{topic.topic}</h3>
             <div className="mt-3 divide-y divide-stone-200 rounded-2xl bg-white ring-1 ring-stone-200">
               {topic.items.map((f) => (
-                <details key={f.q} className="group p-5">
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">
+                <details key={f.q} className="group">
+                  <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 p-5 font-semibold [&::-webkit-details-marker]:hidden">
                     {f.q}
-                    <span aria-hidden className="text-xl text-stone-400 transition group-open:rotate-45">+</span>
+                    <Icon name="plus" className="h-5 w-5 text-stone-500 transition-transform duration-200 group-open:rotate-45" />
                   </summary>
-                  <p className="mt-3 text-stone-700">{f.a}</p>
+                  <p className="px-5 pb-5 text-stone-700">{f.a}</p>
                 </details>
               ))}
             </div>

@@ -1,64 +1,76 @@
 "use client";
 // OWNER: Faith. Which currency a visitor sees: KES for Kenya, USD for everyone else.
-// Default guess comes from the browser's time zone; the visitor can switch, and the choice is remembered.
-import { useSyncExternalStore } from "react";
+// The choice is kept in a cookie so the server renders the right currency straight away (no flash).
+// First visit: guessed from the browser's time zone; the visitor can switch with <CurrencyToggle>.
+import { createContext, useContext, useSyncExternalStore } from "react";
 
 export type Currency = "KES" | "USD";
-const KEY = "ft_currency";
+export const CURRENCY_COOKIE = "ft_currency";
 const listeners = new Set<() => void>();
+let current: Currency | null = null;
+
+const InitialCurrency = createContext<Currency | null>(null);
+
+/** Wrap public pages with the currency read from the cookie on the server. */
+export function CurrencyProvider({ initial, children }: { initial: Currency | null; children: React.ReactNode }) {
+  return <InitialCurrency.Provider value={initial}>{children}</InitialCurrency.Provider>;
+}
 
 function guess(): Currency {
-  try {
-    const saved = localStorage.getItem(KEY);
-    if (saved === "KES" || saved === "USD") return saved;
-  } catch {}
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
   return tz === "Africa/Nairobi" ? "KES" : "USD";
 }
 
-let current: Currency | null = null;
-function get() {
-  return (current ??= guess());
+function remember(c: Currency) {
+  document.cookie = `${CURRENCY_COOKIE}=${c}; path=/; max-age=${60 * 60 * 24 * 365}; samesite=lax`;
 }
 
 export function setCurrency(c: Currency) {
   current = c;
-  try {
-    localStorage.setItem(KEY, c);
-  } catch {}
+  remember(c);
   listeners.forEach((l) => l());
 }
 
 export function useCurrency(): Currency | null {
+  const initial = useContext(InitialCurrency);
   return useSyncExternalStore(
     (l) => (listeners.add(l), () => listeners.delete(l)),
-    get,
-    () => null, // server render: unknown yet
+    () => {
+      if (!current) {
+        current = initial ?? guess();
+        if (!initial) remember(current);
+      }
+      return current;
+    },
+    () => initial, // server render and hydration: whatever the cookie said (null on a first visit)
   );
 }
 
 export const formatKes = (n: number) => `KES ${n.toLocaleString("en-KE")}`;
 export const formatUsd = (n: number) => `US$${n.toLocaleString("en-US")}`;
 
-/** Shows KES or USD depending on the visitor; on the server (before we know) it shows both. */
+/** Shows KES or USD for this visitor; before we know (first visit, server render) it shows both. */
 export function Price({ kes, usd, className }: { kes: number; usd: number; className?: string }) {
   const c = useCurrency();
-  if (c === "KES") return <span className={className}>{formatKes(kes)}</span>;
-  if (c === "USD") return <span className={className}>{formatUsd(usd)}</span>;
-  return <span className={className}>{formatKes(kes)} / {formatUsd(usd)}</span>;
+  const cls = `tabular-nums ${className ?? ""}`;
+  if (c === "KES") return <span className={cls}>{formatKes(kes)}</span>;
+  if (c === "USD") return <span className={cls}>{formatUsd(usd)}</span>;
+  return <span className={cls}>{formatKes(kes)} / {formatUsd(usd)}</span>;
 }
 
-export function CurrencyToggle({ className = "" }: { className?: string }) {
+export function CurrencyToggle({ className = "", tone = "light" }: { className?: string; tone?: "light" | "dark" }) {
   const c = useCurrency();
   return (
-    <div role="group" aria-label="Show prices in" className={`inline-flex rounded-full bg-white p-1 text-sm ring-1 ring-stone-200 ${className}`}>
+    <div role="group" aria-label="Show prices in" className={`inline-flex rounded-full p-0.5 text-sm ${tone === "dark" ? "bg-white/10" : "bg-white ring-1 ring-stone-200"} ${className}`}>
       {(["KES", "USD"] as const).map((x) => (
         <button
           key={x}
           type="button"
           onClick={() => setCurrency(x)}
           aria-pressed={c === x}
-          className={`rounded-full px-3 py-1 font-medium ${c === x ? "bg-brand-800 text-white" : "text-stone-600 hover:text-stone-900"}`}
+          className={`min-h-11 rounded-full px-4 font-medium transition-colors ${c === x
+            ? tone === "dark" ? "bg-sun-400 text-brand-950" : "bg-brand-800 text-white"
+            : tone === "dark" ? "text-brand-100 hover:text-white" : "text-stone-700 hover:text-stone-900"}`}
         >
           {x === "KES" ? "KES · Kenya" : "USD · International"}
         </button>

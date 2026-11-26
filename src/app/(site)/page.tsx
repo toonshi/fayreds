@@ -9,6 +9,8 @@ import { TripCard } from "@/components/TripCard";
 import { Price } from "@/components/currency";
 import { LogoMark } from "@/components/Logo";
 import { SocialIcons } from "@/components/SocialIcons";
+import { Icon } from "@/components/Icon";
+import { tripDates } from "@/components/trip-format";
 import { Recognition } from "@/components/Recognition";
 
 export const dynamic = "force-dynamic";
@@ -71,13 +73,13 @@ export default async function HomePage() {
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-stone-700">{bio.short}</p>
 
             <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-              <Link href="/consultation" className="rounded-full bg-brand-800 px-6 py-3.5 text-center font-semibold text-white shadow-sm hover:bg-brand-900">
+              <Link href="/consultation" className="rounded-full bg-brand-800 px-6 py-3.5 text-center font-semibold text-white shadow-sm transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96]">
                 Travel Consultation
               </Link>
-              <Link href="/marketing" className="rounded-full bg-sun-400 px-6 py-3.5 text-center font-semibold text-brand-950 shadow-sm hover:bg-sun-300">
+              <Link href="/marketing" className="rounded-full bg-sun-400 px-6 py-3.5 text-center font-semibold text-brand-950 shadow-sm transition-[background-color,scale] hover:bg-sun-300 active:scale-[0.96]">
                 Marketing
               </Link>
-              <Link href="/partnership" className="rounded-full bg-white px-6 py-3.5 text-center font-semibold text-brand-900 ring-1 ring-stone-300 hover:bg-brand-50">
+              <Link href="/partnership" className="rounded-full px-6 py-3.5 text-center font-semibold text-brand-900 ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">
                 Partnerships
               </Link>
             </div>
@@ -99,12 +101,19 @@ export default async function HomePage() {
                   <div aria-hidden className="absolute inset-x-0 bottom-0 h-[48%] bg-brand-800" />
                 </>
               )}
-              <div className="absolute inset-x-5 bottom-5 rounded-2xl bg-white/95 p-4 shadow-lg backdrop-blur">
+              <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/95 p-4 shadow-lg backdrop-blur">
                 <p className="text-sm text-stone-600">Next trip</p>
                 {trips[0] ? (
-                  <Link href={`/trips/${trips[0].slug}`} className="font-display text-lg font-semibold text-stone-900 hover:underline">
-                    {trips[0].title}
-                  </Link>
+                  <>
+                    <Link href={`/trips/${trips[0].slug}`} className="font-display text-lg font-semibold text-stone-900 after:absolute after:inset-0 after:rounded-2xl hover:underline">
+                      {trips[0].title}
+                    </Link>
+                    <p className="mt-0.5 flex flex-wrap items-center gap-x-2 text-sm tabular-nums text-stone-700">
+                      <span>{tripDates(trips[0].startDate, trips[0].endDate)}</span>
+                      <span aria-hidden>·</span>
+                      <span>from <Price kes={trips[0].priceKes} usd={trips[0].priceUsd} className="font-semibold text-stone-900" /></span>
+                    </p>
+                  </>
                 ) : (
                   <p className="font-display text-lg font-semibold">New trips coming soon</p>
                 )}
@@ -146,7 +155,7 @@ export default async function HomePage() {
                   <p className="mt-3 text-stone-700">{s.text}</p>
                   <ul className="mt-5 space-y-2 text-sm text-stone-800">
                     {s.points.map((p) => (
-                      <li key={p} className="flex gap-2"><span aria-hidden className="font-bold text-brand-700">✓</span>{p}</li>
+                      <li key={p} className="flex gap-2"><Icon name="check" className="mt-0.5 h-4 w-4 text-brand-700" />{p}</li>
                     ))}
                   </ul>
                   {s.price && (
@@ -154,9 +163,11 @@ export default async function HomePage() {
                       <Price kes={site.consultation.priceKes} usd={site.consultation.priceUsd} className="font-display text-xl font-bold text-stone-900" /> per consultation
                     </p>
                   )}
-                  <Link href={s.href} className={`mt-auto block rounded-full px-5 py-3 text-center font-semibold shadow-sm transition hover:opacity-90 ${s.price ? "mt-5" : "mt-8"} ${s.accent}`}>
-                    {s.cta}
-                  </Link>
+                  <div className="mt-auto pt-6">
+                    <Link href={s.href} className={`block rounded-full px-5 py-3 text-center font-semibold shadow-sm transition-[opacity,scale] hover:opacity-90 active:scale-[0.96] ${s.accent}`}>
+                      {s.cta}
+                    </Link>
+                  </div>
                 </div>
               </li>
             ))}
@@ -175,7 +186,7 @@ export default async function HomePage() {
                 <p className="text-sm font-semibold uppercase tracking-widest text-brand-700">Travel with Faith</p>
                 <h2 id="trips" className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">Upcoming group trips</h2>
               </div>
-              <Link href="/trips" className="font-semibold text-brand-800 hover:underline">See all trips →</Link>
+              <Link href="/trips" className="inline-flex min-h-11 items-center gap-1 font-semibold text-brand-800 hover:underline">See all trips <Icon name="arrowRight" /></Link>
             </div>
             <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {trips.map((t, i) => <li key={t.id} className="flex"><TripCard trip={t} spotsLeft={left[i]} headingLevel={3} /></li>)}
@@ -211,7 +222,7 @@ export default async function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-widest text-brand-700">Meet Faith</p>
             <h2 id="about" className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">{bio.headline}</h2>
             <p className="mt-4 text-lg leading-relaxed text-stone-700">{bio.long[0]}</p>
-            <Link href="/about" className="mt-6 inline-block font-semibold text-brand-800 hover:underline">More about Faith & FAQs →</Link>
+            <Link href="/about" className="mt-4 inline-flex min-h-11 items-center gap-1 font-semibold text-brand-800 hover:underline">More about Faith & FAQs <Icon name="arrowRight" /></Link>
           </div>
           <div className="rounded-3xl bg-white p-7 ring-1 ring-stone-200 lg:col-span-2">
             <h3 className="font-display text-xl font-bold text-stone-900">Questions first?</h3>
@@ -219,7 +230,7 @@ export default async function HomePage() {
             <div className="mt-5 grid gap-3">
               <a href={whatsappLink("Hi Faith, I have a question about Fayreds Travel.")} target="_blank" rel="noreferrer"
                 className="rounded-full bg-emerald-700 px-5 py-3 text-center font-semibold text-white hover:bg-emerald-800">Chat on WhatsApp</a>
-              <a href={`mailto:${site.email}`} className="rounded-full px-5 py-3 text-center font-semibold text-brand-900 ring-1 ring-stone-300 hover:bg-brand-50">
+              <a href={`mailto:${site.email}`} className="rounded-full px-5 py-3 text-center font-semibold text-brand-900 ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">
                 Email {site.email}
               </a>
             </div>

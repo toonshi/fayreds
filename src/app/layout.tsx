@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export const viewport: Viewport = { themeColor: "#0f4c4a" };
+export const viewport: Viewport = { themeColor: "#fbf8f3" }; // matches the sand page background
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (

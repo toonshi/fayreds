@@ -2,9 +2,9 @@
 // intro + "what happens next" on the left, the form on the right.
 import type { ReactNode } from "react";
 import { forms, type FormKind } from "@/lib/forms";
-import { FormRenderer } from "./FormRenderer";
+import { FormRenderer, type FormValues } from "./FormRenderer";
 
-export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, footnote }: {
+export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, footnote, initialValues }: {
   kind: FormKind;
   eyebrow: string;
   title: string;
@@ -13,6 +13,7 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
   steps: string[];
   submitLabel: string;
   footnote?: ReactNode;
+  initialValues?: FormValues;
 }) {
   return (
     <main className="bg-sand-50 text-stone-900">
@@ -37,7 +38,7 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
           </div>
         </div>
         <section aria-label="Form" className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-8 lg:col-span-3">
-          <FormRenderer kind={kind} submitLabel={submitLabel} footnote={footnote} />
+          <FormRenderer kind={kind} submitLabel={submitLabel} footnote={footnote} initialValues={initialValues} />
         </section>
       </div>
     </main>

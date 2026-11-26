@@ -47,7 +47,7 @@ export default async function TripsPage() {
             <h2 className="text-xl font-semibold">New trips are coming soon</h2>
             <p className="mt-2 text-stone-600">Follow Faith on Instagram for announcements, or plan your own trip with a consultation.</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
-              <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 px-5 py-2.5 font-medium hover:bg-stone-50">Follow on Instagram</a>
+              <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full px-5 py-2.5 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Follow on Instagram</a>
               <Link href="/consultation" className="rounded-full bg-brand-800 px-5 py-2.5 font-medium text-white hover:bg-brand-900">Book a consultation</Link>
             </div>
           </div>

@@ -18,7 +18,7 @@ export function SocialIcons({ className = "", tone = "dark" }: { className?: str
       {links.map((l) => (
         <li key={l.name}>
           <a href={l.href} target="_blank" rel="noreferrer" aria-label={`Faith on ${l.name}`}
-            className={`flex h-10 w-10 items-center justify-center rounded-full transition ${tone === "light" ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-brand-800 ring-1 ring-stone-200 hover:bg-brand-50"}`}>
+            className={`flex h-11 w-11 items-center justify-center rounded-full transition-colors ${tone === "light" ? "bg-white/10 text-white hover:bg-white/20" : "bg-white text-brand-800 ring-1 ring-stone-200 hover:bg-brand-50"}`}>
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden><path d={icons[l.name]} /></svg>
           </a>
         </li>

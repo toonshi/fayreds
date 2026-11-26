@@ -29,7 +29,7 @@ export function SiteHeader() {
             {nav.map((n) => (
               <li key={n.href}>
                 <Link href={n.href} aria-current={active(n.href) ? "page" : undefined}
-                  className={`rounded-full px-3.5 py-2 text-sm font-medium transition ${active(n.href) ? "bg-brand-100 text-brand-900" : "text-stone-700 hover:bg-stone-100 hover:text-stone-900"}`}>
+                  className={`inline-flex min-h-11 items-center rounded-full px-3.5 text-sm font-medium transition-colors ${active(n.href) ? "bg-brand-100 text-brand-900" : "text-stone-700 hover:bg-stone-100 hover:text-stone-900"}`}>
                   {n.label}
                 </Link>
               </li>
@@ -38,15 +38,21 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
-          <Link href="/consultation" className="hidden rounded-full bg-brand-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-brand-900 sm:inline-block">
+          <Link href="/consultation" className="hidden min-h-11 items-center rounded-full bg-brand-800 px-5 text-sm font-semibold text-white shadow-sm transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96] sm:inline-flex">
             Book a consultation
           </Link>
           <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-nav"
             className="inline-flex h-11 w-11 items-center justify-center rounded-full text-stone-800 hover:bg-stone-100 lg:hidden">
             <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-            <svg viewBox="0 0 24 24" className="h-6 w-6" aria-hidden fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              {open ? <path d="M6 6l12 12M18 6L6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
-            </svg>
+            {/* both icons stay in the DOM and cross-fade */}
+            <span aria-hidden className="relative h-6 w-6">
+              {[{ d: "M4 7h16M4 12h16M4 17h16", on: !open }, { d: "M6 6l12 12M18 6L6 18", on: open }].map((i) => (
+                <svg key={i.d} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  className={`absolute inset-0 h-6 w-6 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${i.on ? "scale-100 opacity-100 blur-0" : "scale-[0.25] opacity-0 blur-[4px]"}`}>
+                  <path d={i.d} />
+                </svg>
+              ))}
+            </span>
           </button>
         </div>
       </div>
@@ -62,7 +68,7 @@ export function SiteHeader() {
             </li>
           ))}
           <li className="pt-2">
-            <Link href="/consultation" className="block rounded-full bg-brand-800 px-4 py-3 text-center font-semibold text-white">Book a consultation</Link>
+            <Link href="/consultation" className="block rounded-full bg-brand-800 px-4 py-3.5 text-center font-semibold text-white transition-[background-color,scale] active:scale-[0.96]">Book a consultation</Link>
           </li>
         </ul>
       </nav>

@@ -16,17 +16,17 @@ export function SiteFooter() {
         </div>
         <div>
           <h2 className="font-sans text-sm font-semibold uppercase tracking-widest text-sun-300">Explore</h2>
-          <ul className="mt-4 space-y-2 text-sm">
-            {nav.map((n) => <li key={n.href}><Link href={n.href} className="hover:text-white hover:underline">{n.label}</Link></li>)}
+          <ul className="mt-2 text-sm">
+            {nav.map((n) => <li key={n.href}><Link href={n.href} className="inline-flex min-h-11 items-center hover:text-white hover:underline">{n.label}</Link></li>)}
           </ul>
         </div>
         <div>
           <h2 className="font-sans text-sm font-semibold uppercase tracking-widest text-sun-300">Talk to Faith</h2>
-          <ul className="mt-4 space-y-2 text-sm">
-            <li><a href={whatsappLink("Hi Faith!")} target="_blank" rel="noreferrer" className="hover:text-white hover:underline">WhatsApp {site.phoneDisplay}</a></li>
-            <li><a href={`tel:${site.phoneE164}`} className="hover:text-white hover:underline">Call {site.phoneDisplay}</a></li>
-            <li><a href={`mailto:${site.email}`} className="break-all hover:text-white hover:underline">{site.email}</a></li>
-            <li className="text-brand-300">Based in Kenya · working worldwide</li>
+          <ul className="mt-2 text-sm">
+            <li><a href={whatsappLink("Hi Faith!")} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center tabular-nums hover:text-white hover:underline">WhatsApp {site.phoneDisplay}</a></li>
+            <li><a href={`tel:${site.phoneE164}`} className="inline-flex min-h-11 items-center tabular-nums hover:text-white hover:underline">Call {site.phoneDisplay}</a></li>
+            <li><a href={`mailto:${site.email}`} className="inline-flex min-h-11 items-center break-all hover:text-white hover:underline">{site.email}</a></li>
+            <li className="pt-2 text-brand-300">Based in Kenya · working worldwide</li>
           </ul>
         </div>
       </div>

@@ -40,8 +40,17 @@
 
 /* Base styles sit in Tailwind's base layer so utility classes (font-sans, etc.) can still override them. */
 @layer base {
+  :root {
+    color-scheme: light;
+    accent-color: var(--color-brand-800);
+    caret-color: var(--color-brand-800);
+  }
+
   html {
     scroll-behavior: smooth;
+    /* keep focused fields and #anchors clear of the sticky header */
+    scroll-padding-top: 6rem;
+    -webkit-tap-highlight-color: transparent;
   }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -58,9 +67,25 @@
     font-family: var(--font-display);
     letter-spacing: -0.01em;
   }
+  h1, h2, h3 { text-wrap: balance; }
+  p, li, figcaption, blockquote, dd { text-wrap: pretty; }
 
+  ::selection {
+    background: var(--color-sun-200);
+    color: var(--color-brand-950);
+  }
+
+  button:not(:disabled), summary, [role="button"], label:has(> input[type="checkbox"]) { cursor: pointer; }
+  a, button, summary, label, input, select, textarea { touch-action: manipulation; }
+
+  /* Two-tone focus ring: dark teal line + amber halo, visible (≥3:1) on sand, white and teal */
   :focus-visible {
-    outline: 3px solid var(--color-sun-400);
+    outline: 2px solid var(--color-brand-800);
     outline-offset: 2px;
+    box-shadow: 0 0 0 5px var(--color-sun-300);
+  }
+  .bg-brand-900 :focus-visible, .bg-brand-950 :focus-visible, footer :focus-visible {
+    outline-color: var(--color-sun-300);
+    box-shadow: none;
   }
 }
