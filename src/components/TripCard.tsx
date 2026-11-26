@@ -5,8 +5,9 @@ import { Price } from "./currency";
 import { TripImage } from "./TripImage";
 import { nights, tripDates } from "./trip-format";
 
-export function TripCard({ trip, spotsLeft }: { trip: Trip; spotsLeft: number }) {
+export function TripCard({ trip, spotsLeft, headingLevel = 3 }: { trip: Trip; spotsLeft: number; headingLevel?: 2 | 3 }) {
   const soldOut = spotsLeft === 0;
+  const H = `h${headingLevel}` as const;
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200 transition hover:shadow-md">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -16,19 +17,19 @@ export function TripCard({ trip, spotsLeft }: { trip: Trip; spotsLeft: number })
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-sm font-medium text-teal-800">{tripDates(trip.startDate, trip.endDate)} · {nights(trip.startDate, trip.endDate)} nights</p>
-        <h3 className="mt-1 text-xl font-bold text-stone-900">
+        <p className="text-sm font-medium text-brand-800">{tripDates(trip.startDate, trip.endDate)} · {nights(trip.startDate, trip.endDate)} nights</p>
+        <H className="mt-1 font-display text-xl font-bold text-stone-900">
           <Link href={`/trips/${trip.slug}`} className="after:absolute after:inset-0 focus:outline-none focus-visible:underline">
             {trip.title}
           </Link>
-        </h3>
+        </H>
         <p className="mt-2 line-clamp-3 text-sm text-stone-600">{trip.summary}</p>
         <div className="mt-auto flex items-end justify-between pt-5">
           <div>
             <p className="text-xs text-stone-500">From, per person</p>
             <Price kes={trip.priceKes} usd={trip.priceUsd} className="text-lg font-bold text-stone-900" />
           </div>
-          <span aria-hidden className="text-sm font-semibold text-teal-800 group-hover:underline">{soldOut ? "View trip" : "Reserve →"}</span>
+          <span aria-hidden className="text-sm font-semibold text-brand-800 group-hover:underline">{soldOut ? "View trip" : "Reserve →"}</span>
         </div>
       </div>
     </article>

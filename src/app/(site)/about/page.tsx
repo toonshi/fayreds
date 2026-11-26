@@ -21,11 +21,11 @@ export default function AboutPage() {
   };
 
   return (
-    <main className="bg-stone-50 text-stone-900">
+    <main className="bg-sand-50 text-stone-900">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd).replace(/</g, "\\u003c") }} />
 
       <section className="mx-auto max-w-3xl px-4 pb-12 pt-12 sm:pt-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-teal-800">About</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-brand-800">About</p>
         <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">{bio.headline}</h1>
         <p className="mt-4 text-xl text-stone-700">{bio.short}</p>
         <div className="mt-8 space-y-4 text-lg leading-relaxed text-stone-700">
@@ -36,7 +36,7 @@ export default function AboutPage() {
           <dl className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3">
             {bio.stats.map((s) => (
               <div key={s.label} className="rounded-2xl bg-white p-5 ring-1 ring-stone-200">
-                <dd className="text-3xl font-bold text-teal-800">{s.value}</dd>
+                <dd className="text-3xl font-bold text-brand-800">{s.value}</dd>
                 <dt className="text-sm text-stone-600">{s.label}</dt>
               </div>
             ))}
@@ -44,7 +44,7 @@ export default function AboutPage() {
         )}
 
         <div className="mt-10 flex flex-wrap gap-3">
-          <Link href="/consultation" className="rounded-full bg-teal-800 px-5 py-2.5 font-semibold text-white hover:bg-teal-900">Book a consultation</Link>
+          <Link href="/consultation" className="rounded-full bg-brand-800 px-5 py-2.5 font-semibold text-white hover:bg-brand-900">Book a consultation</Link>
           <Link href="/trips" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">See upcoming trips</Link>
           <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">Instagram</a>
           <a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 bg-white px-5 py-2.5 font-medium hover:bg-stone-50">TikTok</a>
@@ -73,7 +73,7 @@ export default function AboutPage() {
         <h2 id="faq" className="text-3xl font-bold">Questions people ask</h2>
         {faqs.map((topic) => (
           <div key={topic.topic} className="mt-8">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-teal-800">{topic.topic}</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-brand-800">{topic.topic}</h3>
             <div className="mt-3 divide-y divide-stone-200 rounded-2xl bg-white ring-1 ring-stone-200">
               {topic.items.map((f) => (
                 <details key={f.q} className="group p-5">
@@ -89,8 +89,8 @@ export default function AboutPage() {
         ))}
         <p className="mt-10 text-stone-600">
           Something else?{" "}
-          <a href={whatsappLink("Hi Faith, I have a question.")} target="_blank" rel="noreferrer" className="font-semibold text-teal-800 underline">Ask on WhatsApp</a>{" "}
-          or email <a href={`mailto:${site.email}`} className="font-semibold text-teal-800 underline">{site.email}</a>.
+          <a href={whatsappLink("Hi Faith, I have a question.")} target="_blank" rel="noreferrer" className="font-semibold text-brand-800 underline">Ask on WhatsApp</a>{" "}
+          or email <a href={`mailto:${site.email}`} className="font-semibold text-brand-800 underline">{site.email}</a>.
         </p>
       </section>
     </main>

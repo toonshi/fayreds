@@ -25,7 +25,7 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
   return (
     <main className="flex min-h-[80vh] items-center bg-stone-50 px-4 py-16 text-stone-900">
       <div className="mx-auto w-full max-w-xl rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-stone-200 sm:p-12">
-        <div aria-hidden className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 text-3xl text-teal-700">✓</div>
+        <div aria-hidden className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-3xl text-brand-700">✓</div>
         <h1 className="mt-6 text-3xl font-bold">Thank you, we&apos;ve got it!</h1>
         <p className="mt-3 text-stone-600">Your {c.what} has been received. {c.next}</p>
 
@@ -49,9 +49,9 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
         <div className="mt-10 border-t border-stone-100 pt-6">
           <p className="text-sm text-stone-500">While you wait, see where Faith is right now</p>
           <ul className="mt-3 flex justify-center gap-5 text-sm font-medium">
-            <li><a href={site.socials.instagram} target="_blank" rel="noreferrer" className="text-teal-800 hover:underline">Instagram</a></li>
-            <li><a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="text-teal-800 hover:underline">TikTok</a></li>
-            <li><a href={site.socials.facebook} target="_blank" rel="noreferrer" className="text-teal-800 hover:underline">Facebook</a></li>
+            <li><a href={site.socials.instagram} target="_blank" rel="noreferrer" className="text-brand-800 hover:underline">Instagram</a></li>
+            <li><a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="text-brand-800 hover:underline">TikTok</a></li>
+            <li><a href={site.socials.facebook} target="_blank" rel="noreferrer" className="text-brand-800 hover:underline">Facebook</a></li>
           </ul>
         </div>
       </div>

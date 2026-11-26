@@ -1,6 +1,8 @@
 // OWNER: Faith. DRAFT bio — Faith to read, correct and personalise before launch.
 export const bio = {
   headline: "Hi, I'm Faith",
+  // TODO(Faith): add a portrait to public/images and set e.g. "/images/faith.jpg"
+  photo: undefined as string | undefined,
   short:
     "Kenyan travel creator and hospitality insider. I find the stays, food and experiences worth your time and money, from Diani to Zanzibar and beyond, and share them honestly with my community.",
   long: [

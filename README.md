@@ -35,7 +35,7 @@ The work is split into **three independent workstreams**. Nobody has to wait for
 
 | Person | Role | Owns (only this person edits these) |
 |---|---|---|
-| **Faith** | Frontend: the public website | `src/app/page.tsx`, `src/app/layout.tsx`, `src/app/(site)/**`, `src/components/**`, `src/content/**`, `src/app/globals.css`, `public/**` |
+| **Faith** | Frontend: the public website | `src/app/layout.tsx` (fonts, metadata), `src/app/(site)/**` (home page, header/footer layout, all public pages), `src/app/{icon.svg,apple-icon.tsx,opengraph-image.tsx,sitemap.ts,robots.ts}`, `src/components/**`, `src/content/**`, `src/app/globals.css`, `public/**` |
 | **Mike** | Backend: APIs, notifications, payments | `src/app/api/**`, `src/app/pay/**`, `src/lib/{enquiries,notify,sms,email,mpesa,stripe,payments,pricing}.ts` |
 | **Hendy** | Admin panel, shared contracts, deployment, integration | `prisma/**`, `src/types/**`, `src/lib/{db,site,forms,phone,auth,trips}.ts`, `src/app/admin/**`, `src/middleware.ts`, `.env.example`, Vercel/Neon setup |
 
@@ -58,14 +58,17 @@ so merge conflicts should be rare.
 
 ## Faith: frontend (public website)
 
+**Status:** F1–F10 are done (PRs `faith/trips-and-content` and `faith/brand-and-forms`). Faith still needs to supply real content:
+her portrait (`bio.photo`), follower counts (`bio.stats`), testimonials, trip photos (admin panel), and to confirm the draft bio and FAQ answers.
+
 Build everything a visitor sees, except the payment page. Read data through `src/lib/trips.ts` and `src/lib/site.ts`,
 and submit forms to `POST /api/enquiries`. Both already work.
 
 | # | Task | Done when… |
 |---|---|---|
 | F1 | **Brand:** logo (SVG wordmark + icon based on "Fayreds Travel"), favicon, colours and fonts as tokens in `globals.css` | Logo in `public/logo.svg`, used in header and favicon; colours defined once and reused |
-| F2 | **Layout:** header (logo, nav, "Book a consultation" button) and footer (Instagram, TikTok and Facebook from `site.socials`, phone, email) in `layout.tsx` | Shows on every public page and works on a phone |
-| F3 | **Home page** (`src/app/page.tsx`): hero, short bio, the **three main buttons** (Marketing / Travel Consultation / Partnerships), upcoming trips (`getPublishedTrips()`), social proof (follower counts, brands worked with), testimonials | All three buttons go to their form pages; trips come from the database |
+| F2 | **Layout:** header (logo, nav, "Book a consultation" button) and footer (Instagram, TikTok and Facebook from `site.socials`, phone, email) in `src/app/(site)/layout.tsx`, so admin and payment pages keep their own simpler layout | Shows on every public page and works on a phone |
+| F3 | **Home page** (`src/app/(site)/page.tsx`): hero, short bio, the **three main buttons** (Marketing / Travel Consultation / Partnerships), upcoming trips (`getPublishedTrips()`), social proof (follower counts, brands worked with), testimonials | All three buttons go to their form pages; trips come from the database |
 | F4 | **`FormRenderer` component** (`src/components/FormRenderer.tsx`): renders any form from `forms[kind]` in `src/lib/forms.ts` (all field types, sections, half-width fields), adds a hidden honeypot input `website_url`, posts an `EnquiryRequest`, shows `errors` under each field on a 422, and on 201 goes to `redirectTo` | One component powers all four forms; errors show clearly; there's a loading state on the button |
 | F5 | **Form pages:** `src/app/(site)/marketing`, `consultation`, `partnership`, each with an intro, what to expect, and `<FormRenderer kind="…"/>` | Submitting creates a row in the database (check with `npx prisma studio`) |
 | F6 | **Trips:** `/trips` (list) and `/trips/[slug]` (details, price, dates, `spotsLeft()`, then the reservation form with `tripSlug`) | A sold-out trip shows "Fully booked" and hides the form |

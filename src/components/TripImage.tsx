@@ -1,6 +1,6 @@
 // OWNER: Faith. Trip photo, or a warm gradient with the destination name until a photo is added in the admin panel.
 const gradients = [
-  "from-teal-700 via-teal-600 to-amber-400",
+  "from-brand-700 via-brand-600 to-amber-400",
   "from-amber-600 via-orange-500 to-rose-400",
   "from-sky-700 via-cyan-600 to-emerald-400",
   "from-emerald-800 via-lime-700 to-amber-400",
