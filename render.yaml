@@ -1,6 +1,8 @@
 # Render Blueprint: creates the website + its PostgreSQL database in one go.
 # Render dashboard → New → Blueprint → pick the toonshi/fayreds repo → Apply.
 # Variables marked `sync: false` are asked for during setup (secrets are never stored in git).
+# Payment/SMS/email keys can be left empty: those services then run in demo mode until the
+# real keys are added in the Render dashboard (Environment tab). (Approach from Mike's first blueprint.)
 
 databases:
   - name: fayreds-db
@@ -18,7 +20,7 @@ services:
     plan: starter              # paid (~$7/mo). Free web services sleep when idle and miss M-Pesa callbacks.
     branch: main
     buildCommand: npm ci && npm run build
-    preDeployCommand: npx prisma migrate deploy
+    preDeployCommand: npx prisma migrate deploy   # runs before each release (paid plans)
     startCommand: npm start
     healthCheckPath: /
     envVars:
@@ -30,7 +32,7 @@ services:
         fromDatabase: { name: fayreds-db, property: connectionString }
       - key: AUTH_SECRET
         generateValue: true
-      - key: ADMIN_PASSWORD
+      - key: ADMIN_PASSWORD      # Faith's admin login: you choose it during setup
         sync: false
       - key: SITE_URL            # e.g. https://fayreds.onrender.com, later https://your-domain
         sync: false
@@ -40,7 +42,7 @@ services:
         value: "13000"
       - key: FAITH_ALERT_PHONE
         value: "+254701484995"
-      # SMS (Africa's Talking) – empty = demo mode
+      # SMS (Africa's Talking): empty = demo mode
       - { key: AT_USERNAME, sync: false }
       - { key: AT_API_KEY, sync: false }
       - { key: AT_SENDER_ID, sync: false }
@@ -49,14 +51,15 @@ services:
       - { key: SMTP_PORT, value: "465" }
       - { key: SMTP_USER, value: fayredstravel@gmail.com }
       - { key: SMTP_PASS, sync: false }
-      # M-Pesa Daraja
+      # M-Pesa Daraja: sandbox defaults until go-live
       - { key: MPESA_ENV, value: sandbox }
+      - { key: MPESA_SHORTCODE, value: "174379" }
+      - { key: MPESA_TRANSACTION_TYPE, value: CustomerPayBillOnline }
       - { key: MPESA_CONSUMER_KEY, sync: false }
       - { key: MPESA_CONSUMER_SECRET, sync: false }
-      - { key: MPESA_SHORTCODE, sync: false }
       - { key: MPESA_PASSKEY, sync: false }
       - key: MPESA_CALLBACK_SECRET
         generateValue: true
-      # Stripe
+      # Stripe: empty = demo mode
       - { key: STRIPE_SECRET_KEY, sync: false }
       - { key: STRIPE_WEBHOOK_SECRET, sync: false }

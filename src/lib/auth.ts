@@ -1,36 +1,39 @@
-import { SignJWT, jwtVerify } from "jose";
+// OWNER: Hendy. Admin login for Faith (single password from ADMIN_PASSWORD).
+import "server-only";
+import { createHash, timingSafeEqual } from "node:crypto";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { ADMIN_COOKIE, SESSION_DAYS, signToken, verifyToken } from "./session";
 
-export const ADMIN_COOKIE = "ft_admin";
-const secret = () => new TextEncoder().encode(process.env.AUTH_SECRET || "insecure-dev-secret");
+export { ADMIN_COOKIE, verifyToken };
+
+export function checkPassword(input: string) {
+  const expected = process.env.ADMIN_PASSWORD;
+  if (!expected) return false;
+  const a = createHash("sha256").update(input).digest();
+  const b = createHash("sha256").update(expected).digest();
+  return timingSafeEqual(a, b);
+}
 
 export async function createSession() {
-  const jwt = await new SignJWT({ role: "admin" })
-    .setProtectedHeader({ alg: "HS256" })
-    .setIssuedAt()
-    .setExpirationTime("14d")
-    .sign(secret());
-  (await cookies()).set(ADMIN_COOKIE, jwt, {
+  (await cookies()).set(ADMIN_COOKIE, await signToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
-    maxAge: 60 * 60 * 24 * 14,
+    maxAge: 60 * 60 * 24 * SESSION_DAYS,
   });
 }
 
-export async function verifyToken(token?: string) {
-  if (!token) return false;
-  try {
-    await jwtVerify(token, secret());
-    return true;
-  } catch {
-    return false;
-  }
+export async function deleteSession() {
+  (await cookies()).delete(ADMIN_COOKIE);
 }
 
+export async function isAdmin() {
+  return verifyToken((await cookies()).get(ADMIN_COOKIE)?.value);
+}
+
+/** Call at the top of every admin page, server action and route handler. */
 export async function requireAdmin() {
-  const ok = await verifyToken((await cookies()).get(ADMIN_COOKIE)?.value);
-  if (!ok) redirect("/admin/login");
+  if (!(await isAdmin())) redirect("/admin/login");
 }
