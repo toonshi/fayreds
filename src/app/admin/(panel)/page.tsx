@@ -168,9 +168,10 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
                     <div translate="no" className="mt-1 font-mono text-xs">{e.reference}</div>
                   </td>
                   <td className="px-4 py-3">
-                    <Link href={`/admin/enquiries/${e.id}`} className="font-medium text-teal-800 hover:underline">{e.name}</Link>
+                    <div className="font-medium text-stone-900">{e.name}</div>
                     <div className="text-xs text-stone-600">{e.country}</div>
                     <div className="mt-1.5"><PrefBadge pref={pref} /></div>
+                    <Link href={`/admin/enquiries/${e.id}`} className="mt-1.5 inline-flex min-h-8 items-center text-sm font-semibold text-teal-800 hover:underline">View →</Link>
                   </td>
                   <td className="max-w-sm px-4 py-3">
                     <Badge className={typeColor[e.type]}>{typeLabel(e.type)}</Badge>
