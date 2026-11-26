@@ -6,6 +6,8 @@ import { Badge } from "../../../_components/Badge";
 import { EnquiryManageForm } from "../../../_components/EnquiryManageForm";
 import { BackLink } from "../../../_components/BackLink";
 import { ReplyForm } from "../../../_components/ReplyForm";
+import { DealsPanel } from "../../../_components/DealsPanel";
+import { CATEGORY_LABEL, matchOffers, needsFromDetails, suggestPackage } from "@/lib/deals";
 import {
   detailRows, fmtDate, fmtDateTime, fmtMoney, statusColor, statusLabel, typeColor, typeLabel, waNumber,
 } from "../../../_lib/format";
@@ -14,15 +16,29 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const e = await db.enquiry.findUnique({
     where: { id },
-    include: { trip: true, payments: { orderBy: { createdAt: "desc" } } },
+    include: { trip: true, payments: { orderBy: { createdAt: "desc" } }, offerPicks: true },
   });
   if (!e) notFound();
 
   const firstName = e.name.split(" ")[0];
   const waText = `Hi ${firstName}, this is Faith from ${site.name} about your ${typeLabel(e.type).toLowerCase()} request (${e.reference}).`;
   const what = typeLabel(e.type).toLowerCase();
+
+  // deal finder (consultations only)
+  const isConsult = e.type === "CONSULTATION";
+  const offers = isConsult ? await db.offer.findMany({ where: { active: true } }) : [];
+  const needs = needsFromDetails(e.details);
+  const matches = isConsult ? matchOffers(offers, needs) : [];
+  const pkg = suggestPackage(matches, needs);
+  const kes = (n: number) => `KES ${n.toLocaleString("en-KE")}`;
+  const packageText = pkg.items.length
+    ? `Hi ${firstName}, here is a plan for ${needs.destination || "your trip"} that fits your budget:\n` +
+      pkg.items.map((m) => `- ${CATEGORY_LABEL[m.offer.category]}: ${m.offer.title}, ${kes(m.totalKes)}${m.offer.bookingUrl ? ` (${m.offer.bookingUrl})` : ""}`).join("\n") +
+      `\nTotal about ${kes(pkg.totalKes)} (${kes(pkg.perPersonKes)} per person). Shall I book it for you? Faith, ${site.name}`
+    : null;
   const unpaid = (e.type === "CONSULTATION" || e.type === "RESERVATION") && !e.payments.some((p) => p.status === "PAID");
   const templates = [
+    ...(packageText ? [{ label: "Send suggested package", text: packageText }] : []),
     { label: "Thanks, I'll be in touch", text: `Hi ${firstName}, thank you for your ${what} request (${e.reference}). I've read it and I'll get back to you shortly. Faith, ${site.name}` },
     { label: "Ask for a call", text: `Hi ${firstName}, thanks for reaching out about your ${what} request (${e.reference}). When is a good time for a quick call this week? Faith, ${site.name}` },
     ...(unpaid ? [{ label: "Payment reminder", text: `Hi ${firstName}, your ${what} (${e.reference}) is waiting for payment. You can pay here: ${siteUrl(`/pay/${e.reference}`)} Faith, ${site.name}` }] : []),
@@ -56,6 +72,10 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <ReplyForm id={e.id} firstName={firstName} reference={e.reference} smsAvailable={smsAvailable} templates={templates} />
+
+          {isConsult && (
+            <DealsPanel enquiryId={e.id} firstName={firstName} needs={needs} matches={matches} pkg={pkg} picks={e.offerPicks} hasOffers={offers.length > 0} />
+          )}
 
           <section className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
             <h2 className="font-semibold">Contact</h2>

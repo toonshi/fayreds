@@ -21,6 +21,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <NavLink href="/admin" exact>Enquiries</NavLink>
             <NavLink href="/admin/payments">Payments</NavLink>
             <NavLink href="/admin/trips">Trips</NavLink>
+            <NavLink href="/admin/offers">Deals</NavLink>
           </nav>
           <div className="flex shrink-0 items-center text-sm">
             <Link href="/" target="_blank" className="hidden min-h-11 items-center px-3 text-stone-600 hover:text-stone-900 sm:inline-flex">View site ↗</Link>
