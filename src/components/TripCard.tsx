@@ -16,7 +16,7 @@ export function TripCard({ trip, spotsLeft }: { trip: Trip; spotsLeft: number })
         </span>
       </div>
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-sm font-medium text-teal-800">{tripDates(trip.startDate, trip.endDate)} · {nights(trip.startDate, trip.endDate)} nights</p>
+        <p className="text-sm font-medium text-ocean-800">{tripDates(trip.startDate, trip.endDate)} · {nights(trip.startDate, trip.endDate)} nights</p>
         <h3 className="mt-1 text-xl font-bold text-stone-900">
           <Link href={`/trips/${trip.slug}`} className="after:absolute after:inset-0 focus:outline-none focus-visible:underline">
             {trip.title}
@@ -28,7 +28,7 @@ export function TripCard({ trip, spotsLeft }: { trip: Trip; spotsLeft: number })
             <p className="text-xs text-stone-500">From, per person</p>
             <Price kes={trip.priceKes} usd={trip.priceUsd} className="text-lg font-bold text-stone-900" />
           </div>
-          <span aria-hidden className="text-sm font-semibold text-teal-800 group-hover:underline">{soldOut ? "View trip" : "Reserve →"}</span>
+          <span aria-hidden className="text-sm font-semibold text-ocean-800 group-hover:underline">{soldOut ? "View trip" : "Reserve →"}</span>
         </div>
       </div>
     </article>

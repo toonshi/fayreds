@@ -13,7 +13,7 @@ type Values = Record<string, string>;
 
 const inputCls = (bad: boolean) =>
   `mt-1 block w-full rounded-lg border bg-white px-3 py-2.5 text-stone-900 outline-none transition focus:ring-2 ${
-    bad ? "border-rose-500 focus:ring-rose-500/20" : "border-stone-300 focus:border-teal-700 focus:ring-teal-700/20"
+    bad ? "border-rose-500 focus:ring-rose-500/20" : "border-stone-300 focus:border-ocean-700 focus:ring-ocean-700/20"
   }`;
 
 export function ReservationForm({ tripSlug, tripTitle, prices, spotsLeft }: { tripSlug: string; tripTitle: string; prices: Prices; spotsLeft: number }) {
@@ -130,19 +130,19 @@ export function ReservationForm({ tripSlug, tripTitle, prices, spotsLeft }: { tr
         ))}
       </div>
 
-      <div className="rounded-xl bg-teal-50 p-4 text-sm text-teal-950 ring-1 ring-teal-100" aria-live="polite">
+      <div className="rounded-xl bg-ocean-50 p-4 text-sm text-ocean-950 ring-1 ring-ocean-100" aria-live="polite">
         <p className="font-semibold">
           To pay now: {summary.kenyan === null
             ? `${formatKes(summary.kes)} / ${formatUsd(summary.usd)}`
             : summary.kenyan ? `${formatKes(summary.kes)} by M-Pesa` : `${formatUsd(summary.usd)} by card`}
         </p>
-        <p className="mt-0.5 text-teal-900/80">
+        <p className="mt-0.5 text-ocean-900/80">
           {summary.deposit ? "Deposit" : "Full amount"} × {summary.spots} spot{summary.spots > 1 ? "s" : ""}.
           {summary.deposit && " Faith will share when the balance is due."}
         </p>
       </div>
 
-      <button disabled={sending} className="w-full rounded-full bg-teal-800 px-6 py-3.5 font-semibold text-white transition hover:bg-teal-900 disabled:opacity-60 sm:w-auto">
+      <button disabled={sending} className="w-full rounded-full bg-ocean-800 px-6 py-3.5 font-semibold text-white transition hover:bg-ocean-900 disabled:opacity-60 sm:w-auto">
         {sending ? "Reserving…" : "Continue to payment"}
       </button>
       <p className="text-xs text-stone-500">You&apos;ll get an SMS (Kenyan numbers) and an email confirming your reservation.</p>

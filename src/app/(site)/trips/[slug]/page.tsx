@@ -60,7 +60,7 @@ export default async function TripPage({ params }: Params) {
         </div>
         <div className="mt-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-medium text-teal-800">{trip.destination}</p>
+            <p className="font-medium text-ocean-800">{trip.destination}</p>
             <h1 className="mt-1 text-3xl font-bold tracking-tight sm:text-5xl">{trip.title}</h1>
             <p className="mt-2 text-lg text-stone-600">{tripDates(trip.startDate, trip.endDate)} · {n + 1} days, {n} nights</p>
           </div>
@@ -93,7 +93,7 @@ export default async function TripPage({ params }: Params) {
               <h2 className="text-xl font-bold">What&apos;s included</h2>
               <ul className="mt-4 space-y-2">
                 {trip.includes.map((x) => (
-                  <li key={x} className="flex gap-3"><span aria-hidden className="font-bold text-teal-700">✓</span><span>{x}</span></li>
+                  <li key={x} className="flex gap-3"><span aria-hidden className="font-bold text-ocean-700">✓</span><span>{x}</span></li>
                 ))}
               </ul>
             </section>
@@ -132,11 +132,11 @@ export default async function TripPage({ params }: Params) {
               <p>Reserve with a deposit of <Price kes={trip.depositKes} usd={trip.depositUsd} className="font-semibold" /> per person.</p>
               <p className="mt-1 text-stone-600">Kenyans pay by M-Pesa, international guests by card.</p>
             </div>
-            <p className={`text-sm font-semibold ${left === 0 ? "text-stone-500" : left <= 3 ? "text-rose-700" : "text-teal-800"}`}>
+            <p className={`text-sm font-semibold ${left === 0 ? "text-stone-500" : left <= 3 ? "text-rose-700" : "text-ocean-800"}`}>
               {left === 0 ? "Fully booked" : `${left} of ${trip.totalSpots} spots left`}
             </p>
             {left > 0 && (
-              <a href="#reserve" className="block rounded-full bg-teal-800 px-6 py-3 text-center font-semibold text-white hover:bg-teal-900">Reserve a spot</a>
+              <a href="#reserve" className="block rounded-full bg-ocean-800 px-6 py-3 text-center font-semibold text-white hover:bg-ocean-900">Reserve a spot</a>
             )}
             <a href={whatsappLink(`Hi Faith, I have a question about ${trip.title}.`)} target="_blank" rel="noreferrer"
               className="block rounded-full border border-stone-300 px-6 py-3 text-center font-medium hover:bg-stone-50">Ask Faith a question</a>

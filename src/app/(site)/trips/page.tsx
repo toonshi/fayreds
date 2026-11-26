@@ -22,7 +22,7 @@ export default async function TripsPage() {
   return (
     <main className="bg-stone-50 text-stone-900">
       <section className="mx-auto max-w-6xl px-4 pb-8 pt-12 sm:pt-16">
-        <p className="text-sm font-semibold uppercase tracking-widest text-teal-800">Travel with Faith</p>
+        <p className="text-sm font-semibold uppercase tracking-widest text-ocean-800">Travel with Faith</p>
         <h1 className="mt-2 max-w-2xl text-4xl font-bold tracking-tight sm:text-5xl">Upcoming group trips</h1>
         <p className="mt-4 max-w-2xl text-lg text-stone-600">
           Small groups, places Faith has vetted herself, and everything planned for you. Reserve with a deposit and
@@ -48,7 +48,7 @@ export default async function TripsPage() {
             <p className="mt-2 text-stone-600">Follow Faith on Instagram for announcements, or plan your own trip with a consultation.</p>
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <a href={site.socials.instagram} target="_blank" rel="noreferrer" className="rounded-full border border-stone-300 px-5 py-2.5 font-medium hover:bg-stone-50">Follow on Instagram</a>
-              <Link href="/consultation" className="rounded-full bg-teal-800 px-5 py-2.5 font-medium text-white hover:bg-teal-900">Book a consultation</Link>
+              <Link href="/consultation" className="rounded-full bg-ocean-800 px-5 py-2.5 font-medium text-white hover:bg-ocean-900">Book a consultation</Link>
             </div>
           </div>
         )}

@@ -58,7 +58,7 @@ export function CurrencyToggle({ className = "" }: { className?: string }) {
           type="button"
           onClick={() => setCurrency(x)}
           aria-pressed={c === x}
-          className={`rounded-full px-3 py-1 font-medium ${c === x ? "bg-teal-800 text-white" : "text-stone-600 hover:text-stone-900"}`}
+          className={`rounded-full px-3 py-1 font-medium ${c === x ? "bg-ocean-800 text-white" : "text-stone-600 hover:text-stone-900"}`}
         >
           {x === "KES" ? "KES · Kenya" : "USD · International"}
         </button>
