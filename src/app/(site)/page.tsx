@@ -57,17 +57,17 @@ export default async function HomePage() {
 
   return (
     <main>
-      {/* ---------- Hero: photo first. Phones: text over the photo. Desktop: text panel + photo side by side. ---------- */}
+      {/* ---------- Hero: photo first. Phones: photo on top, text below it. Desktop: text panel + photo side by side. ---------- */}
       <section className="relative bg-brand-950 text-white lg:grid lg:min-h-[calc(100svh-4.5rem)] lg:grid-cols-[1fr_1.1fr]">
-        <div className="relative h-[calc(100svh-4rem)] max-h-[52rem] min-h-[34rem] lg:order-2 lg:h-auto lg:max-h-none">
+        <div className="relative h-[58svh] max-h-[36rem] min-h-[24rem] lg:order-2 lg:h-auto lg:max-h-none">
           {bio.photo && (
             <Image src={bio.photo} alt={bio.photoAlt} fill priority sizes="(min-width: 1024px) 55vw, 100vw" className="object-cover object-[50%_25%]" />
           )}
-          {/* darken the bottom on phones so the white text stays readable */}
-          <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-brand-950 via-brand-950/55 to-transparent lg:hidden" />
+          {/* fade the bottom of the photo into the dark text panel on phones */}
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-brand-950 to-transparent lg:hidden" />
         </div>
 
-        <div className="absolute inset-x-0 bottom-0 px-5 pb-10 sm:px-8 lg:static lg:flex lg:items-center lg:px-12 lg:py-20 xl:px-16">
+        <div className="relative -mt-10 px-5 pb-12 sm:px-8 lg:mt-0 lg:flex lg:items-center lg:px-12 lg:py-20 xl:px-16">
           <div className="max-w-xl">
             <p className="eyebrow text-sun-300">Kenyan travel creator · Hospitality insider</p>
             <h1 className="mt-4 text-[2.75rem] leading-[1.02] sm:text-6xl xl:text-7xl">
