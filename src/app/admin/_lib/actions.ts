@@ -31,14 +31,21 @@ export async function logout() {
 // ---------- enquiries ----------
 export type EnquiryFormState = { ok?: boolean; error?: string; savedAt?: number } | undefined;
 
-export async function updateEnquiry(id: string, _: EnquiryFormState, form: FormData): Promise<EnquiryFormState> {
+/** Status saves the moment it changes, on its own, so it can never overwrite notes. */
+export async function setEnquiryStatus(id: string, status: string): Promise<EnquiryFormState> {
   await requireAdmin();
-  const status = String(form.get("status") ?? "");
-  const notes = String(form.get("notes") ?? "").slice(0, 5000);
   if (!STATUSES.some((s) => s.value === status)) return { error: "Choose a status" };
-  await db.enquiry.update({ where: { id }, data: { status: status as EnquiryStatus, notes: notes || null } });
+  await db.enquiry.update({ where: { id }, data: { status: status as EnquiryStatus } });
   revalidatePath(`/admin/enquiries/${id}`);
   revalidatePath("/admin");
+  return { ok: true, savedAt: Date.now() };
+}
+
+export async function saveNotes(id: string, _: EnquiryFormState, form: FormData): Promise<EnquiryFormState> {
+  await requireAdmin();
+  const notes = String(form.get("notes") ?? "").slice(0, 5000);
+  await db.enquiry.update({ where: { id }, data: { notes: notes.trim() ? notes : null } });
+  revalidatePath(`/admin/enquiries/${id}`);
   return { ok: true, savedAt: Date.now() };
 }
 

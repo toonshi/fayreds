@@ -1,17 +1,20 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { db } from "@/lib/db";
 import { site, siteUrl } from "@/lib/site";
 import { isKenyanPhone } from "@/lib/phone";
-import { Badge } from "../../../_components/Badge";
-import { EnquiryManageForm } from "../../../_components/EnquiryManageForm";
-import { BackLink } from "../../../_components/BackLink";
-import { ReplyForm } from "../../../_components/ReplyForm";
-import { ContactButtons, PrefBadge } from "../../../_components/ContactButtons";
-import { DealsPanel } from "../../../_components/DealsPanel";
 import { CATEGORY_LABEL, matchOffers, needsFromDetails, suggestPackage } from "@/lib/deals";
+import { BackLink } from "../../../_components/BackLink";
+import { ContactButtons } from "../../../_components/ContactButtons";
+import { DealsPanel } from "../../../_components/DealsPanel";
+import { NotesForm } from "../../../_components/NotesForm";
+import { ReplyForm } from "../../../_components/ReplyForm";
+import { StatusLabel } from "../../../_components/StatusLabel";
+import { StatusSelect } from "../../../_components/StatusSelect";
 import {
-  contactPref, detailRows, fmtDate, fmtDateTime, fmtPayment, keyFacts, statusColor, statusLabel, typeColor, typeLabel,
+  contactPref, detailGroups, fmtDate, fmtDateTime, fmtPayment, messageOf, paymentStatusLabel, plural, relTime, typeLabel,
 } from "../../../_lib/format";
+import { h2 } from "../../../_lib/ui";
 
 export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,10 +25,8 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   if (!e) notFound();
 
   const firstName = e.name.split(" ")[0];
-  const pref = contactPref(e);
-  const facts = keyFacts(e.type, e.details, e.trip, e.spots);
-  const message = (e.details as Record<string, unknown> | null)?.message;
   const what = typeLabel(e.type).toLowerCase();
+  const pref = contactPref(e);
 
   // deal finder (consultations only)
   const isConsult = e.type === "CONSULTATION";
@@ -39,6 +40,7 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
       pkg.items.map((m) => `- ${CATEGORY_LABEL[m.offer.category]}: ${m.offer.title}, ${kes(m.totalKes)}${m.offer.bookingUrl ? ` (${m.offer.bookingUrl})` : ""}`).join("\n") +
       `\nTotal about ${kes(pkg.totalKes)} (${kes(pkg.perPersonKes)} per person). Shall I book it for you? Faith, ${site.name}`
     : null;
+
   const unpaid = (e.type === "CONSULTATION" || e.type === "RESERVATION") && !e.payments.some((p) => p.status === "PAID");
   const templates = [
     ...(packageText ? [{ label: "Send suggested package", text: packageText }] : []),
@@ -48,101 +50,101 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
     ...(e.type === "MARKETING" || e.type === "PARTNERSHIP" ? [{ label: "Send my rates", text: `Hi ${firstName}, thank you for your interest in working together. I'll email you my rates and media kit today. Faith, ${site.name}` }] : []),
   ];
   const smsAvailable = isKenyanPhone(e.phone) || process.env.SMS_INTERNATIONAL === "true";
+  const message = messageOf(e.details);
+  const groups = detailGroups(e.type, e.details);
 
   return (
-    <div className="space-y-6">
-      <BackLink href="/admin">All enquiries</BackLink>
+    <div>
+      <BackLink href="/admin">Enquiries</BackLink>
 
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge className={typeColor[e.type]}>{typeLabel(e.type)}</Badge>
-            <Badge className={statusColor[e.status]}>{statusLabel(e.status)}</Badge>
-            <PrefBadge pref={pref} />
-            <span translate="no" className="whitespace-nowrap font-mono text-xs text-stone-600">{e.reference}</span>
-          </div>
-          <h1 className="mt-2 text-2xl font-bold break-words">{e.name}</h1>
-          <p className="text-sm text-stone-600">Received {fmtDateTime(e.createdAt)} · {e.country}</p>
+      {/* who, what, and how to reach them: one block */}
+      <header className="mt-4 flex flex-wrap items-start justify-between gap-x-10 gap-y-5">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold break-words text-balance">{e.name}</h1>
+          <p className="mt-1.5 text-sm text-stone-600">
+            {typeLabel(e.type)} from {e.country}
+            <span aria-hidden className="mx-2 text-stone-300">·</span>
+            <time dateTime={e.createdAt.toISOString()} title={fmtDateTime(e.createdAt)}>{relTime(e.createdAt)}</time>
+            <span aria-hidden className="mx-2 text-stone-300">·</span>
+            <span translate="no" className="tabular-nums">{e.reference}</span>
+          </p>
         </div>
+        <StatusSelect id={e.id} status={e.status} />
+      </header>
+
+      <div className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3">
         <ContactButtons name={e.name} phone={e.phone} email={e.email} reference={e.reference} what={what} pref={pref} />
+        <p className="text-sm text-stone-500" title={pref.stated ? "The client chose this in the form" : "Not asked in this form: guessed from the phone number"}>
+          {pref.stated ? `Prefers ${pref.via}` : `${pref.via} suggested`}
+        </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-6 lg:col-span-2">
-          <section aria-labelledby="glance" className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
-            <h2 id="glance" className="font-semibold">At a glance</h2>
-            <dl className="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
-              {facts.map(([label, value]) => <Row key={label} label={label} value={value} />)}
-              <Row label="Phone" value={e.phone} />
-              <Row label="Email" value={e.email} />
-              <Row label="Country" value={e.country} />
-              <Row label="Contact by" value={pref.stated ? pref.via : `Not asked (${pref.via} suggested)`} />
-              {e.trip && <Row label="Trip dates" value={fmtDate(e.trip.startDate)} />}
-            </dl>
-            {typeof message === "string" && message.trim() && (
-              <blockquote className="mt-4 whitespace-pre-wrap break-words rounded-lg bg-stone-50 p-4 text-sm text-stone-800 ring-1 ring-stone-200">
-                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-600">Their message</span>
-                {message}
-              </blockquote>
-            )}
-          </section>
+      <div className="mt-12 grid gap-y-14 lg:grid-cols-[minmax(0,1fr)_28rem] lg:gap-x-12">
+        {/* what they asked for: the main reading column */}
+        <div className="space-y-10">
+          {message && (
+            <section aria-labelledby="msg-h">
+              <h2 id="msg-h" className={h2}>Their message</h2>
+              <p className="mt-3 max-w-prose rounded-xl bg-sand-50 px-5 py-4 text-[15px] leading-relaxed whitespace-pre-wrap text-pretty break-words text-stone-800">{message}</p>
+            </section>
+          )}
 
-          <section aria-labelledby="pay" className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
-            <h2 id="pay" className="font-semibold">Payments</h2>
-            {e.payments.length === 0 ? (
-              <p className="mt-2 text-sm text-stone-600">
-                {e.type === "CONSULTATION" || e.type === "RESERVATION" ? "No payment started yet." : "No payment for this kind of request."}
-              </p>
-            ) : (
-              <ul className="mt-3 divide-y divide-stone-100 text-sm">
+          {e.trip && (
+            <section aria-labelledby="trip-h">
+              <h2 id="trip-h" className={h2}>Trip</h2>
+              <dl className="mt-3 grid grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)] gap-x-6 gap-y-2.5 text-sm">
+                <dt className="text-stone-500">Trip</dt>
+                <dd><Link href={`/admin/trips/${e.trip.id}`} className="text-brand-700 underline-offset-4 hover:underline">{e.trip.title}</Link> <span className="text-stone-500">· {fmtDate(e.trip.startDate)}</span></dd>
+                {e.spots != null && <><dt className="text-stone-500">Spots</dt><dd className="tabular-nums">{plural(e.spots, "spot")}</dd></>}
+              </dl>
+            </section>
+          )}
+
+          {groups.map((g) => (
+            <section key={g.title} aria-label={g.title}>
+              <h2 className={h2}>{g.title}</h2>
+              <dl className="mt-3 grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-[minmax(0,9.5rem)_minmax(0,1fr)] sm:gap-y-2.5">
+                {g.rows.map(([label, value]) => (
+                  <div key={label} className="contents">
+                    <dt className="mt-2 text-stone-500 sm:mt-0">{label}</dt>
+                    <dd className="whitespace-pre-wrap break-words text-stone-900">{value}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))}
+
+          {e.payments.length > 0 && (
+            <section aria-labelledby="pay-h">
+              <h2 id="pay-h" className={h2}>Payments</h2>
+              <ul className="mt-3 divide-y divide-stone-100 border-y border-stone-100 text-sm">
                 {e.payments.map((p) => (
-                  <li key={p.id} className="grid gap-1 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
-                    <div>
-                      <p className="font-semibold tabular-nums">{fmtPayment(p)} <span className="font-normal text-stone-600">· {p.provider === "MPESA" ? "M-Pesa" : "Card"}</span></p>
-                      <p className="text-xs text-stone-600">{p.description}{p.mpesaReceipt ? ` · Receipt ${p.mpesaReceipt}` : ""}{p.failureReason ? ` · ${p.failureReason}` : ""}</p>
-                    </div>
-                    <span className="flex items-center gap-2">
-                      <Badge className={statusColor[p.status]}>{p.status === "PAID" ? "Paid" : p.status.toLowerCase()}</Badge>
-                      <span className="text-xs tabular-nums text-stone-600">{fmtDateTime(p.paidAt ?? p.createdAt)}</span>
+                  <li key={p.id} className="flex flex-wrap items-center gap-x-6 gap-y-1 py-3">
+                    <span className="w-28 font-medium tabular-nums">{fmtPayment(p)}</span>
+                    <span className="text-stone-600">{p.provider === "MPESA" ? "M-Pesa" : "Card"}</span>
+                    <StatusLabel status={p.status}>{paymentStatusLabel(p.status)}</StatusLabel>
+                    <span className="ml-auto text-stone-500 tabular-nums">
+                      {p.mpesaReceipt && <span translate="no" className="mr-3">{p.mpesaReceipt}</span>}
+                      {p.failureReason && <span className="mr-3">{p.failureReason}</span>}
+                      {fmtDateTime(p.paidAt ?? p.createdAt)}
                     </span>
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
-
-          <section aria-labelledby="answers" className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
-            <h2 id="answers" className="font-semibold">All answers</h2>
-            <dl className="mt-3 divide-y divide-stone-100 text-sm">
-              {detailRows(e.type, e.details).map(([label, value]) => (
-                <div key={label} className="grid gap-1 py-2 sm:grid-cols-3">
-                  <dt className="text-stone-600">{label}</dt>
-                  <dd className="whitespace-pre-wrap break-words sm:col-span-2">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </section>
+            </section>
+          )}
 
           {isConsult && (
             <DealsPanel enquiryId={e.id} firstName={firstName} needs={needs} matches={matches} pkg={pkg} picks={e.offerPicks} hasOffers={offers.length > 0} />
           )}
-
-          <ReplyForm id={e.id} firstName={firstName} reference={e.reference} smsAvailable={smsAvailable} templates={templates} />
         </div>
 
-        <aside className="order-first lg:order-none">
-          <EnquiryManageForm key={e.updatedAt.toISOString()} id={e.id} status={e.status} notes={e.notes ?? ""} updatedLabel={fmtDateTime(e.updatedAt)} />
+        {/* what Faith does about it */}
+        <aside className="space-y-12 lg:border-l lg:border-stone-200 lg:pl-12" aria-label="Reply and notes">
+          <ReplyForm id={e.id} firstName={firstName} reference={e.reference} smsAvailable={smsAvailable} templates={templates} />
+          <NotesForm id={e.id} notes={e.notes ?? ""} />
         </aside>
       </div>
-    </div>
-  );
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <dt className="text-stone-600">{label}</dt>
-      <dd className="font-medium break-words">{value}</dd>
     </div>
   );
 }

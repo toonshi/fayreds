@@ -3,11 +3,11 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { db } from "@/lib/db";
 import { CATEGORY_LABEL, UNIT_LABEL } from "@/lib/deals";
-import { Badge } from "../../_components/Badge";
 import { SubmitButton } from "../../_components/SubmitButton";
 import { SavedNotice } from "../../_components/SavedNotice";
 import { toggleOffer } from "../../_lib/actions";
 import { fmtMoney } from "../../_lib/format";
+import { btn } from "../../_lib/ui";
 
 export default async function OffersPage() {
   const [offers, earned] = await Promise.all([
@@ -16,53 +16,83 @@ export default async function OffersPage() {
   ]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Deals</h1>
-          <p className="max-w-2xl text-sm text-stone-600">
-            Your partner offers. Each consultation automatically shows the ones that fit the client&apos;s place, budget, group and interests.
+          <h1 className="text-2xl font-semibold">Deals</h1>
+          <p className="mt-1.5 max-w-xl text-sm text-pretty text-stone-600">
+            Your partner offers. Each consultation shows the ones that fit the client&apos;s place, budget, group and interests.
           </p>
         </div>
-        <Link href="/admin/offers/new" className="inline-flex min-h-11 items-center rounded-lg bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800">+ New offer</Link>
+        <div className="flex items-center gap-3">
+          <Suspense><SavedNotice /></Suspense>
+          <Link href="/admin/offers/new" className={btn.primary}>
+            <svg aria-hidden viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+            New offer
+          </Link>
+        </div>
       </div>
-      <Suspense><SavedNotice /></Suspense>
 
-      <dl className="grid gap-3 sm:grid-cols-3">
-        <div className="rounded-xl bg-white p-4 ring-1 ring-stone-200"><dt className="text-xs text-stone-600">Active offers</dt><dd className="text-2xl font-bold tabular-nums">{offers.filter((o) => o.active).length}</dd></div>
-        <div className="rounded-xl bg-white p-4 ring-1 ring-stone-200"><dt className="text-xs text-stone-600">Bookings through you</dt><dd className="text-2xl font-bold tabular-nums">{earned._count}</dd><dd className="text-xs text-stone-600 tabular-nums">{fmtMoney(earned._sum.amountKes ?? 0, "KES")} in sales</dd></div>
-        <div className="rounded-xl bg-white p-4 ring-1 ring-stone-200"><dt className="text-xs text-stone-600">Commission earned (estimated)</dt><dd className="text-2xl font-bold tabular-nums text-teal-800">{fmtMoney(earned._sum.commissionKes ?? 0, "KES")}</dd></div>
+      {/* what the partnerships have earned: one line of three numbers */}
+      <dl className="mt-8 flex flex-wrap gap-x-14 gap-y-6">
+        <div>
+          <dt className="text-sm text-stone-500">Commission earned (estimated)</dt>
+          <dd className="mt-1.5 text-2xl font-semibold tabular-nums">{fmtMoney(earned._sum.commissionKes ?? 0, "KES")}</dd>
+        </div>
+        <div>
+          <dt className="text-sm text-stone-500">Bookings through you</dt>
+          <dd className="mt-1.5 text-2xl font-semibold tabular-nums">{earned._count}</dd>
+          <dd className="mt-0.5 text-sm text-stone-600 tabular-nums">{fmtMoney(earned._sum.amountKes ?? 0, "KES")} in sales</dd>
+        </div>
+        <div>
+          <dt className="text-sm text-stone-500">Active offers</dt>
+          <dd className="mt-1.5 text-2xl font-semibold tabular-nums">{offers.filter((o) => o.active).length}</dd>
+        </div>
       </dl>
 
       {offers.length === 0 ? (
-        <div className="rounded-xl bg-white p-8 text-center ring-1 ring-stone-200">
-          <p className="font-semibold">Add your first partner offer</p>
-          <p className="mt-1 text-sm text-stone-600">Hotels, Airbnbs, paragliding, transfers, restaurants: anything you book for clients.</p>
-          <Link href="/admin/offers/new" className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-teal-700 px-4 text-sm font-semibold text-white hover:bg-teal-800">+ New offer</Link>
+        <div className="mt-12 border-t border-stone-200 py-20 text-center">
+          <p className="text-[15px] font-medium text-stone-900">Add your first partner offer</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-pretty text-stone-500">Hotels, Airbnbs, paragliding, transfers, restaurants: anything you book for clients. Consultations then suggest them automatically.</p>
+          <Link href="/admin/offers/new" className={`${btn.primary} mt-5`}>New offer</Link>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-xl bg-white ring-1 ring-stone-200">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-stone-200 text-xs text-stone-600">
-              <tr><th className="p-3">Offer</th><th className="p-3">Type</th><th className="p-3">Where</th><th className="p-3">Price</th><th className="p-3">Commission</th><th className="p-3">Booked</th><th className="p-3"></th></tr>
+        <div className="mt-12 overflow-x-auto border-t border-stone-200">
+          <table className="w-full min-w-[44rem] text-left text-sm">
+            <thead className="text-stone-500">
+              <tr className="border-b border-stone-100">
+                <th scope="col" className="py-3 pr-6 font-normal">Offer</th>
+                <th scope="col" className="py-3 pr-6 font-normal">Where</th>
+                <th scope="col" className="py-3 pr-6 text-right font-normal">Price</th>
+                <th scope="col" className="py-3 pr-6 text-right font-normal">Commission</th>
+                <th scope="col" className="py-3 pr-6 text-right font-normal">Booked</th>
+                <th scope="col" className="py-3"><span className="sr-only">On or off</span></th>
+              </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100">
+            <tbody>
               {offers.map((o) => (
-                <tr key={o.id} className={o.active ? "" : "text-stone-400"}>
-                  <td className="p-3">
-                    <Link href={`/admin/offers/${o.id}`} className="font-semibold text-teal-800 hover:underline">{o.title}</Link>
-                    <span className="block text-xs text-stone-600">{o.partner}</span>
+                <tr key={o.id} className={`border-b border-stone-100 last:border-0 ${o.active ? "" : "text-stone-400"}`}>
+                  <td className="py-3.5 pr-6">
+                    <Link href={`/admin/offers/${o.id}`} className={`font-medium underline-offset-4 hover:text-brand-800 hover:underline ${o.active ? "text-stone-900" : "text-stone-500"}`}>{o.title}</Link>
+                    <span className="mt-0.5 block text-[13px] text-stone-500">{CATEGORY_LABEL[o.category]} · {o.partner}</span>
                   </td>
-                  <td className="p-3">{CATEGORY_LABEL[o.category]}</td>
-                  <td className="p-3">{o.location}</td>
-                  <td className="p-3 tabular-nums">{fmtMoney(o.priceKes, "KES")}<span className="block text-xs text-stone-600">{UNIT_LABEL[o.unit]}</span></td>
-                  <td className="p-3 tabular-nums">{o.commissionPct}%</td>
-                  <td className="p-3 tabular-nums">{o.picks.length}<span className="block text-xs text-stone-600">{fmtMoney(o.picks.reduce((n, p) => n + p.commissionKes, 0), "KES")}</span></td>
-                  <td className="p-3 text-right">
-                    <form action={toggleOffer.bind(null, o.id)}>
-                      <SubmitButton pendingLabel="…" className="text-stone-700 hover:bg-stone-100">{o.active ? "Switch off" : "Switch on"}</SubmitButton>
+                  <td className="py-3.5 pr-6">{o.location}</td>
+                  <td className="py-3.5 pr-6 text-right whitespace-nowrap tabular-nums">
+                    {fmtMoney(o.priceKes, "KES")}
+                    <span className="block text-[13px] text-stone-500">{UNIT_LABEL[o.unit]}</span>
+                  </td>
+                  <td className="py-3.5 pr-6 text-right tabular-nums">{o.commissionPct}%</td>
+                  <td className="py-3.5 pr-6 text-right whitespace-nowrap tabular-nums">
+                    {o.picks.length}
+                    <span className="block text-[13px] text-stone-500">{fmtMoney(o.picks.reduce((n, p) => n + p.commissionKes, 0), "KES")}</span>
+                  </td>
+                  <td className="py-3.5 text-right">
+                    <form action={toggleOffer.bind(null, o.id)} className="flex items-center justify-end gap-2">
+                      {!o.active && <span className="text-sm text-stone-500">Off</span>}
+                      <SubmitButton pendingLabel="Saving…" className={btn.quiet}>
+                        {o.active ? "Switch off" : "Switch on"}<span className="sr-only"> {o.title}</span>
+                      </SubmitButton>
                     </form>
-                    {!o.active && <Badge className="bg-gray-200 text-gray-700">Off</Badge>}
                   </td>
                 </tr>
               ))}

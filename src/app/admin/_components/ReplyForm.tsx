@@ -3,6 +3,7 @@
 // straight from the admin. No phone or mail app needed.
 import { useActionState, useEffect, useRef, useState } from "react";
 import { replyToEnquiry, type ReplyState } from "../_lib/actions";
+import { btn, h2, input, textarea } from "../_lib/ui";
 
 type Template = { label: string; text: string };
 
@@ -26,67 +27,60 @@ export function ReplyForm({ id, firstName, reference, smsAvailable, templates }:
   }, [state?.sentAt, state?.ok]);
 
   const parts = Math.max(1, Math.ceil(message.length / 160));
+  const channels = [sms && "SMS", email && "email"].filter(Boolean).join(" + ");
 
   return (
-    <form action={action} className="space-y-4 rounded-xl bg-white p-5 ring-1 ring-stone-200">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="font-semibold">Reply to {firstName}</h2>
-        <span className="text-xs text-stone-600">Sent from {reference}&apos;s enquiry</span>
-      </div>
+    <form action={action} className="space-y-3">
+      <label htmlFor={`reply-${id}`} className={`block ${h2}`}>Reply to {firstName}</label>
 
       {templates.length > 0 && (
-        <div>
-          <p className="text-sm text-stone-600">Start from a template</p>
-          <div className="mt-2 flex flex-wrap gap-2">
-            {templates.map((t) => (
-              <button key={t.label} type="button" onClick={() => { setMessage(t.text); box.current?.focus(); }}
-                className="min-h-9 rounded-full border border-stone-300 bg-white px-3 text-sm hover:bg-stone-50">
-                {t.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Start from a template">
+          {templates.map((t) => (
+            <button key={t.label} type="button" onClick={() => { setMessage(t.text); box.current?.focus(); }}
+              className="h-8 rounded-full border border-stone-200 bg-white px-3 text-[13px] text-stone-700 transition-[background-color,border-color,scale] duration-150 hover:border-stone-300 hover:bg-sand-50 active:scale-[0.96]">
+              {t.label}
+            </button>
+          ))}
         </div>
       )}
 
-      <label className="block text-sm">
-        <span className="text-stone-600">Message</span>
-        <textarea ref={box} name="message" rows={5} value={message} onChange={(e) => setMessage(e.target.value)} required maxLength={2000}
-          placeholder={`Hi ${firstName}, …`}
-          className="mt-1 w-full rounded-md border border-stone-300 px-3 py-2 text-base sm:text-sm" />
-        <span className="mt-1 block text-xs text-stone-600 tabular-nums">
+      <div>
+        <textarea id={`reply-${id}`} ref={box} name="message" rows={6} value={message} onChange={(e) => setMessage(e.target.value)}
+          required maxLength={2000} placeholder={`Hi ${firstName}, …`} autoComplete="off" className={textarea} />
+        <p className="mt-1.5 text-[13px] tabular-nums text-stone-500">
           {message.length} characters{sms && message.length > 0 ? ` · ${parts} SMS${parts > 1 ? " (long messages cost more)" : ""}` : ""}
-        </span>
-      </label>
+        </p>
+      </div>
 
       {email && (
-        <label className="block text-sm">
-          <span className="text-stone-600">Email subject</span>
-          <input name="subject" defaultValue={`Re: your request ${reference}`} maxLength={150}
-            className="mt-1 min-h-11 w-full rounded-md border border-stone-300 px-3 text-base sm:text-sm" />
+        <label className="block">
+          <span className="text-[13px] text-stone-500">Email subject</span>
+          <input name="subject" defaultValue={`Re: your request ${reference}`} maxLength={150} autoComplete="off" className={`mt-1 ${input}`} />
         </label>
       )}
 
-      <fieldset className="flex flex-wrap gap-x-6 gap-y-2 text-sm">
-        <legend className="sr-only">Send by</legend>
-        <label className={`inline-flex min-h-11 items-center gap-2 ${smsAvailable ? "" : "text-stone-400"}`}>
-          <input type="checkbox" name="sms" checked={sms} disabled={!smsAvailable} onChange={(e) => setSms(e.target.checked)} className="h-5 w-5" />
-          SMS{!smsAvailable && " (Kenyan numbers only)"}
-        </label>
-        <label className="inline-flex min-h-11 items-center gap-2">
-          <input type="checkbox" name="email" checked={email} onChange={(e) => setEmail(e.target.checked)} className="h-5 w-5" />
-          Email
-        </label>
-      </fieldset>
+      <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-3 pt-1">
+        <fieldset className="flex gap-5 text-sm">
+          <legend className="sr-only">Send by</legend>
+          <label className={`inline-flex h-10 items-center gap-2 ${smsAvailable ? "text-stone-800" : "text-stone-400"}`}
+            title={smsAvailable ? undefined : "SMS only goes to Kenyan (+254) numbers"}>
+            <input type="checkbox" name="sms" checked={sms} disabled={!smsAvailable} onChange={(e) => setSms(e.target.checked)} className="size-4 accent-brand-800" />
+            SMS{!smsAvailable && <span className="sr-only"> (Kenyan numbers only)</span>}
+          </label>
+          <label className="inline-flex h-10 items-center gap-2 text-stone-800">
+            <input type="checkbox" name="email" checked={email} onChange={(e) => setEmail(e.target.checked)} className="size-4 accent-brand-800" />
+            Email
+          </label>
+        </fieldset>
+        <button disabled={pending || !message.trim() || (!sms && !email)} className={btn.primary}>
+          {pending ? "Sending…" : channels ? `Send ${channels}` : "Choose SMS or email"}
+        </button>
+      </div>
 
-      <button disabled={pending || !message.trim() || (!sms && !email)}
-        className="min-h-11 w-full rounded-lg bg-teal-700 font-semibold text-white transition-[background-color,scale] hover:bg-teal-800 active:not-disabled:scale-[0.96] disabled:opacity-60">
-        {pending ? "Sending…" : `Send ${[sms && "SMS", email && "email"].filter(Boolean).join(" + ") || "reply"}`}
-      </button>
-
-      <p role="status" aria-live="polite" className="min-h-5 text-sm">
+      <p role="status" aria-live="polite" className="min-h-5 text-[13px]">
         {state?.error ? <span className="text-rose-700">{state.error}</span>
-          : state?.result && !pending ? <span className={state.ok ? "font-medium text-emerald-700" : "text-amber-800"}>{state.ok ? "✓ " : ""}{state.result}</span>
-          : <span className="text-xs text-stone-600">Each reply is saved at the top of your private notes.</span>}
+          : state?.result && !pending ? <span className={state.ok ? "text-emerald-700" : "text-sun-700"}>{state.result}</span>
+          : <span className="text-stone-500">{smsAvailable ? "Replies are logged in your private notes." : "SMS only goes to Kenyan numbers. Replies are logged in your private notes."}</span>}
       </p>
     </form>
   );
