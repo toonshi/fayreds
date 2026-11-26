@@ -1,6 +1,8 @@
 // OWNER: Faith. /marketing: hotels, restaurants, activities & brands.
 import type { Metadata } from "next";
 import { FormPage } from "@/components/FormPage";
+import { VideoGuides } from "@/components/VideoGuides";
+import { videos } from "@/content/videos";
 
 export const metadata: Metadata = {
   title: "Marketing with Faith · Fayreds Travel",
@@ -18,6 +20,14 @@ export default function MarketingPage() {
       title="Put your place in front of real travellers"
       submitLabel="Send request"
       footnote="You'll get an SMS (Kenyan numbers) and an email confirming we've received your request."
+      after={
+        <VideoGuides
+          id="brand-examples"
+          title="The kind of content you get"
+          intro="Recent hotel, resort and restaurant features from Faith's TikTok: honest, specific, and made for people who actually book."
+          videos={videos.filter((v) => v.forBrands)}
+        />
+      }
       steps={[
         "Tell Faith about your business and what you have in mind.",
         "You get an SMS / email confirming your request was received.",

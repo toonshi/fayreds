@@ -89,3 +89,42 @@
     box-shadow: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Motion. One orchestrated moment (the hero on load) plus gentle scroll reveals.
+   - Reveals use native scroll-driven animations: browsers without them simply
+     show the content (nothing is ever hidden waiting for JavaScript).
+   - Everything is skipped for people who ask for reduced motion.
+   --------------------------------------------------------------------------- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(1.25rem); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes settle {
+  from { opacity: 0; transform: translateY(1rem) scale(0.97); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* hero: children of .intro rise in sequence on first load (set --d on each) */
+  .intro > * {
+    animation: rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--d, 0) * 90ms);
+  }
+  .intro-media {
+    animation: settle 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.25s both;
+  }
+
+  @supports (animation-timeline: view()) {
+    /* .reveal: rises in as it scrolls into view; --i staggers siblings in a row */
+    .reveal {
+      animation: rise linear both;
+      animation-timeline: view();
+      animation-range: entry calc(var(--i, 0) * 6%) entry calc(55% + var(--i, 0) * 6%);
+    }
+  }
+}
+
+/* hide the native scrollbar on carousels (they have their own buttons and progress bar) */
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }

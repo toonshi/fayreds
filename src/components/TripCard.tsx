@@ -10,9 +10,9 @@ export function TripCard({ trip, spotsLeft, headingLevel = 3 }: { trip: Trip; sp
   const soldOut = spotsLeft === 0;
   const H = `h${headingLevel}` as const;
   return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200 transition-shadow hover:shadow-md has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand-800 has-[a:focus-visible]:ring-offset-2">
+    <article className="group relative flex flex-col overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-stone-200 transition-[translate,box-shadow] duration-300 ease-out hover:-translate-y-1.5 hover:shadow-xl hover:shadow-brand-900/10 has-[a:focus-visible]:ring-2 has-[a:focus-visible]:ring-brand-800 has-[a:focus-visible]:ring-offset-2">
       <div className="relative aspect-[4/3] overflow-hidden">
-        <TripImage src={trip.imageUrl} alt={trip.destination} seed={trip.slug} className="transition-transform duration-300 ease-out group-hover:scale-[1.03]" />
+        <TripImage src={trip.imageUrl} alt={trip.destination} seed={trip.slug} className="transition-transform duration-500 ease-out group-hover:scale-[1.06]" />
         <span className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-semibold ${soldOut ? "bg-stone-900/80 text-white" : spotsLeft <= 3 ? "bg-rose-600 text-white" : "bg-white/90 text-stone-800"}`}>
           {soldOut ? "Fully booked" : spotsLeft <= 3 ? `Only ${spotsLeft} spot${spotsLeft === 1 ? "" : "s"} left` : `${spotsLeft} spots left`}
         </span>
@@ -30,7 +30,7 @@ export function TripCard({ trip, spotsLeft, headingLevel = 3 }: { trip: Trip; sp
             <p className="text-xs text-stone-500">From, per person</p>
             <Price kes={trip.priceKes} usd={trip.priceUsd} className="text-lg font-bold text-stone-900" />
           </div>
-          <span aria-hidden className="inline-flex items-center gap-1 text-sm font-semibold text-brand-800 group-hover:underline">{soldOut ? "View trip" : <>Reserve <Icon name="arrowRight" /></>}</span>
+          <span aria-hidden className="inline-flex items-center gap-1 text-sm font-semibold text-brand-800 group-hover:underline">{soldOut ? "View trip" : <>Reserve <span className="transition-transform duration-200 group-hover:translate-x-1"><Icon name="arrowRight" /></span></>}</span>
         </div>
       </div>
     </article>
