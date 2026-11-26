@@ -1,26 +1,24 @@
 import Link from "next/link";
-import type { EnquiryStatus, EnquiryType, Prisma } from "@prisma/client";
+import type { EnquiryType, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { Badge } from "../_components/Badge";
-import { STATUSES, TYPES, fmtDateTime, nairobiDay, statusColor, statusLabel, typeColor, typeLabel } from "../_lib/format";
+import { FilterSelect } from "../_components/FilterSelect";
+import { StatusLabel } from "../_components/StatusLabel";
+import { TYPES, VIEWS, fmtDateTime, relTime, statusLabel, summaryOf, typeLabel } from "../_lib/format";
+import { btn, input } from "../_lib/ui";
 
-const PAGE_SIZE = 25;
-type Search = { type?: string; status?: string; q?: string; from?: string; to?: string; page?: string };
+const PAGE_SIZE = 30;
+type Search = { view?: string; type?: string; q?: string; page?: string };
 
 export default async function EnquiriesPage({ searchParams }: { searchParams: Promise<Search> }) {
   const sp = await searchParams;
+  const q = sp.q?.trim() || undefined;
   const type = TYPES.some((t) => t.value === sp.type) ? (sp.type as EnquiryType) : undefined;
-  const status = STATUSES.some((s) => s.value === sp.status) ? (sp.status as EnquiryStatus) : undefined;
-  const q = sp.q?.trim();
+  // a search looks everywhere unless a view was picked on purpose
+  const view = VIEWS.find((v) => v.value === sp.view) ?? VIEWS.find((v) => v.value === (q ? "all" : "reply"))!;
   const page = Math.max(1, Number(sp.page) || 1);
-  const valid = (d?: string) => (d && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : undefined);
-  const from = valid(sp.from) ? nairobiDay(sp.from!) : undefined;
-  const to = valid(sp.to) ? new Date(nairobiDay(sp.to!).getTime() + 86_400_000) : undefined;
 
-  const where: Prisma.EnquiryWhereInput = {
+  const search: Prisma.EnquiryWhereInput = {
     type,
-    status,
-    createdAt: from || to ? { gte: from, lt: to } : undefined,
     OR: q
       ? [
           { reference: { contains: q, mode: "insensitive" } },
@@ -30,167 +28,133 @@ export default async function EnquiriesPage({ searchParams }: { searchParams: Pr
         ]
       : undefined,
   };
+  const where: Prisma.EnquiryWhereInput = { ...search, status: view.statuses ? { in: view.statuses } : undefined };
 
-  const [rows, total, byType, byStatus] = await Promise.all([
+  const [rows, total, byStatus] = await Promise.all([
     db.enquiry.findMany({
       where, orderBy: { createdAt: "desc" }, skip: (page - 1) * PAGE_SIZE, take: PAGE_SIZE,
       include: { trip: { select: { title: true } } },
     }),
     db.enquiry.count({ where }),
-    db.enquiry.groupBy({ by: ["type"], _count: true }),
-    db.enquiry.groupBy({ by: ["status"], _count: true }),
+    db.enquiry.groupBy({ by: ["status"], where: search, _count: true }),
   ]);
-  const countType = (t: EnquiryType) => byType.find((x) => x.type === t)?._count ?? 0;
-  const countStatus = (s: EnquiryStatus) => byStatus.find((x) => x.status === s)?._count ?? 0;
+  const countOf = (v: (typeof VIEWS)[number]) =>
+    byStatus.filter((s) => !v.statuses || v.statuses.includes(s.status)).reduce((n, s) => n + s._count, 0);
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const now = new Date();
 
-  const qs = (patch: Partial<Search>) => {
+  const href = (patch: Partial<Search>) => {
     const p = new URLSearchParams();
-    const merged = { ...sp, page: undefined, ...patch };
-    for (const [k, v] of Object.entries(merged)) if (v) p.set(k, String(v));
-    const s = p.toString();
-    return s ? `/admin?${s}` : "/admin";
+    for (const [k, v] of Object.entries({ view: sp.view, type, q, ...patch })) if (v) p.set(k, String(v));
+    return p.size ? `/admin?${p}` : "/admin";
   };
-  const exportQs = new URLSearchParams(Object.entries({ type, status, q, from: sp.from, to: sp.to }).filter(([, v]) => v) as [string, string][]);
+  const exportHref = `/admin/export?${new URLSearchParams(Object.entries({ kind: "enquiries", view: view.value, type, q }).filter(([, v]) => v) as [string, string][])}`;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Enquiries</h1>
-          <p className="text-sm text-stone-600">Every form submitted on the website.</p>
-        </div>
-        <a href={`/admin/export?kind=enquiries&${exportQs}`} className="inline-flex min-h-11 items-center rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium hover:bg-stone-50">
-          Export CSV
-        </a>
-      </div>
-
-      {/* counts per type: also act as filters */}
-      <div className="hidden grid-cols-2 gap-3 sm:grid md:grid-cols-5">
-        <StatCard href={qs({ type: undefined })} label="All" value={byType.reduce((n, x) => n + x._count, 0)} active={!type} />
-        {TYPES.map((t) => (
-          <StatCard key={t.value} href={qs({ type: t.value })} label={t.label} value={countType(t.value)} active={type === t.value} />
-        ))}
-      </div>
-
-      {/* phones: type filter as compact pills instead of stat cards */}
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 text-sm sm:hidden">
-        <Link href={qs({ type: undefined })} className={pill(!type)}>All types</Link>
-        {TYPES.map((t) => (
-          <Link key={t.value} href={qs({ type: t.value })} className={pill(type === t.value)}>
-            {t.label} <span className="tabular-nums opacity-70">{countType(t.value)}</span>
-          </Link>
-        ))}
-      </div>
-
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 text-sm sm:mx-0 sm:flex-wrap sm:px-0">
-        <Link href={qs({ status: undefined })} className={pill(!status)}>Any status</Link>
-        {STATUSES.map((s) => (
-          <Link key={s.value} href={qs({ status: s.value })} className={pill(status === s.value)}>
-            {s.label} <span className="tabular-nums opacity-70">{countStatus(s.value)}</span>
-          </Link>
-        ))}
-      </div>
-
-      <form className="flex flex-wrap items-end gap-2 rounded-xl bg-white p-3 ring-1 ring-stone-200">
-        {type && <input type="hidden" name="type" value={type} />}
-        {status && <input type="hidden" name="status" value={status} />}
-        <label className="min-w-48 flex-1">
-          <span className="text-xs text-stone-600">Search name, email, phone or reference</span>
-          <input type="search" name="q" defaultValue={q} autoComplete="off" spellCheck={false}
-            className="mt-0.5 min-h-11 w-full rounded-md border border-stone-300 px-3 text-base sm:text-sm" />
-        </label>
-        <label className="flex-1 sm:flex-none">
-          <span className="text-xs text-stone-600">From</span>
-          <input type="date" name="from" defaultValue={sp.from} className="mt-0.5 block min-h-11 w-full rounded-md border border-stone-300 px-2 text-base sm:text-sm" />
-        </label>
-        <label className="flex-1 sm:flex-none">
-          <span className="text-xs text-stone-600">To</span>
-          <input type="date" name="to" defaultValue={sp.to} className="mt-0.5 block min-h-11 w-full rounded-md border border-stone-300 px-2 text-base sm:text-sm" />
-        </label>
-        <button className="min-h-11 cursor-pointer rounded-md bg-teal-700 px-5 font-medium text-white transition-[background-color,scale] hover:bg-teal-800 active:scale-[0.96]">Search</button>
-        {(q || sp.from || sp.to || type || status) && <Link href="/admin" className="inline-flex min-h-11 items-center px-2 text-sm text-stone-600 hover:underline">Clear all</Link>}
-      </form>
-
-      {/* phones: one tappable card per enquiry */}
-      <ul className="space-y-2 sm:hidden">
-        {rows.map((e) => (
-          <li key={e.id}>
-            <Link href={`/admin/enquiries/${e.id}`} className="block rounded-xl bg-white p-4 ring-1 ring-stone-200 active:bg-stone-50">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-teal-800">{e.name}</p>
-                  <p className="truncate text-sm text-stone-600">{e.trip?.title ?? e.country}</p>
-                </div>
-                <Badge className={statusColor[e.status]}>{statusLabel(e.status)}</Badge>
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-2 text-xs text-stone-600">
-                <Badge className={typeColor[e.type]}>{typeLabel(e.type)}</Badge>
-                <span className="tabular-nums">{fmtDateTime(e.createdAt)}</span>
-              </div>
-            </Link>
-          </li>
-        ))}
-        {rows.length === 0 && <li className="rounded-xl bg-white p-8 text-center text-stone-600 ring-1 ring-stone-200">No enquiries match these filters.</li>}
-      </ul>
-
-      <div className="hidden overflow-x-auto rounded-xl bg-white ring-1 ring-stone-200 sm:block">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-600">
-            <tr>
-              <th className="px-4 py-3">Received</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Type</th>
-              <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Contact</th>
-              <th className="px-4 py-3">Reference</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-stone-100">
-            {rows.map((e) => (
-              <tr key={e.id} className="hover:bg-stone-50">
-                <td className="whitespace-nowrap px-4 py-3 tabular-nums text-stone-600">{fmtDateTime(e.createdAt)}</td>
-                <td className="px-4 py-3">
-                  <Link href={`/admin/enquiries/${e.id}`} className="relative font-medium text-teal-800 after:absolute after:-inset-x-2 after:-inset-y-3 hover:underline">{e.name}</Link>
-                  <div className="text-xs text-stone-600">{e.trip?.title ?? e.country}</div>
-                </td>
-                <td className="px-4 py-3"><Badge className={typeColor[e.type]}>{typeLabel(e.type)}</Badge></td>
-                <td className="px-4 py-3"><Badge className={statusColor[e.status]}>{statusLabel(e.status)}</Badge></td>
-                <td className="px-4 py-3 text-stone-600">
-                  <div>{e.phone}</div>
-                  <div className="text-xs">{e.email}</div>
-                </td>
-                <td className="whitespace-nowrap px-4 py-3 font-mono text-xs">{e.reference}</td>
-              </tr>
-            ))}
-            {rows.length === 0 && (
-              <tr><td colSpan={6} className="px-4 py-12 text-center text-stone-600">No enquiries match these filters.</td></tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {pages > 1 && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="tabular-nums text-stone-600">{total} enquiries · page {page} of {pages}</span>
-          <div className="flex gap-2">
-            {page > 1 && <Link href={qs({ page: String(page - 1) })} className="inline-flex min-h-11 items-center rounded-md border bg-white px-4">← Newer</Link>}
-            {page < pages && <Link href={qs({ page: String(page + 1) })} className="inline-flex min-h-11 items-center rounded-md border bg-white px-4">Older →</Link>}
+    <div>
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-4">
+        <h1 className="text-2xl font-semibold">Enquiries</h1>
+        <form role="search" action="/admin" className="w-full sm:w-80">
+          {type && <input type="hidden" name="type" value={type} />}
+          <label htmlFor="enquiry-search" className="sr-only">Search enquiries</label>
+          <div className="relative">
+            <svg aria-hidden viewBox="0 0 24 24" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-stone-400" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+            <input id="enquiry-search" type="search" name="q" defaultValue={q} autoComplete="off" spellCheck={false}
+              placeholder="Name, email, phone or reference…" className={`${input} pl-9`} />
           </div>
+        </form>
+      </div>
+
+      <div className="mt-8 flex flex-wrap items-end justify-between gap-x-6 gap-y-3 border-b border-stone-200">
+        <nav aria-label="Enquiry views" className="-mb-px flex gap-6 overflow-x-auto">
+          {VIEWS.map((v) => {
+            const on = v.value === view.value;
+            return (
+              <Link key={v.value} href={href({ view: v.value })} aria-current={on ? "page" : undefined}
+                className={`relative inline-flex h-11 shrink-0 items-center gap-2 text-sm transition-colors duration-150 after:absolute after:inset-x-0 after:bottom-0 after:h-0.5 after:rounded-full ${
+                  on ? "font-medium text-stone-900 after:bg-brand-800" : "text-stone-500 hover:text-stone-900"}`}>
+                {v.label}
+                <span className={`tabular-nums ${on ? "text-stone-500" : "text-stone-400"}`}>{countOf(v)}</span>
+              </Link>
+            );
+          })}
+        </nav>
+        <div className="pb-2">
+          <FilterSelect param="type" label="Type of enquiry" value={type}
+            options={[{ value: "", label: "All types" }, ...TYPES.map((t) => ({ value: t.value, label: t.label }))]} />
         </div>
+      </div>
+
+      {q && (
+        <p className="mt-4 text-sm text-stone-600">
+          Results for <span className="font-medium text-stone-900">“{q}”</span>
+          <Link href={href({ q: undefined, page: undefined })} className="ml-2 text-brand-700 underline-offset-4 hover:underline">Clear search</Link>
+        </p>
       )}
+
+      {rows.length > 0 ? (
+        <ul className="mt-2">
+          {rows.map((e) => {
+            const isNew = e.status === "NEW";
+            const summary = summaryOf(e.type, e.details, e.trip?.title, e.spots);
+            return (
+              <li key={e.id} className="border-b border-stone-100 last:border-0">
+                <Link href={`/admin/enquiries/${e.id}`}
+                  className="-mx-3 grid grid-cols-[0.5rem_minmax(0,1fr)_auto] items-baseline gap-x-3 gap-y-1 rounded-xl px-3 py-4 transition-colors duration-150 hover:bg-sand-50">
+                  <span aria-hidden className={`size-2 self-center rounded-full ${isNew ? "bg-brand-600" : ""}`} />
+                  <p className="min-w-0 truncate text-[15px] text-stone-900">
+                    <span className={isNew ? "font-semibold" : "font-medium"}>{e.name}</span>
+                    {isNew && <span className="sr-only"> (new)</span>}
+                    <span className="ml-2 text-sm text-stone-500">{typeLabel(e.type)}</span>
+                  </p>
+                  <time dateTime={e.createdAt.toISOString()} title={fmtDateTime(e.createdAt)}
+                    className={`text-right text-sm whitespace-nowrap tabular-nums ${isNew ? "font-medium text-stone-900" : "text-stone-500"}`}>
+                    {relTime(e.createdAt, now)}
+                  </time>
+                  <span />
+                  <p className="min-w-0 truncate text-sm text-stone-600">{summary || e.country}</p>
+                  <span className="text-right">
+                    {view.value !== "reply" && !isNew && <StatusLabel status={e.status}>{statusLabel(e.status)}</StatusLabel>}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      ) : (
+        <Empty view={view.value} q={q} activeHref={href({ view: "active" })} />
+      )}
+
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-sm text-stone-500">
+        <a href={exportHref} className={btn.quiet + " -ml-3"}>
+          <svg aria-hidden viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14" /></svg>
+          Download as CSV
+        </a>
+        {pages > 1 && (
+          <div className="flex items-center gap-3">
+            <span className="tabular-nums">{(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, total)} of {total}</span>
+            {page > 1 ? <Link href={href({ page: String(page - 1) })} className={btn.secondary}>Newer</Link> : <span className={`${btn.secondary} opacity-50`} aria-disabled>Newer</span>}
+            {page < pages ? <Link href={href({ page: String(page + 1) })} className={btn.secondary}>Older</Link> : <span className={`${btn.secondary} opacity-50`} aria-disabled>Older</span>}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-const pill = (active: boolean) =>
-  `inline-flex min-h-11 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-4 ring-1 sm:min-h-9 ${active ? "bg-teal-700 text-white ring-teal-700" : "bg-white text-stone-700 ring-stone-200 hover:bg-stone-50"}`;
-
-function StatCard({ href, label, value, active }: { href: string; label: string; value: number; active: boolean }) {
+function Empty({ view, q, activeHref }: { view: string; q?: string; activeHref: string }) {
+  const [title, body] = q
+    ? ["Nothing matches that search", "Try part of a name, an email address, a phone number or a reference like FT-CON-…"]
+    : view === "reply"
+      ? ["You're all caught up", "New enquiries from the website land here until you reply or change their status."]
+      : view === "active"
+        ? ["Nothing in progress", "Enquiries move here once you reply, or when a client is paying."]
+        : ["Nothing here yet", "Enquiries from the website's forms will show up here."];
   return (
-    <Link href={href} className={`rounded-xl bg-white p-4 ring-1 ${active ? "ring-2 ring-teal-600" : "ring-stone-200 hover:ring-stone-300"}`}>
-      <div className="text-xs text-stone-600">{label}</div>
-      <div className="mt-1 text-2xl font-bold tabular-nums">{value}</div>
-    </Link>
+    <div className="py-20 text-center">
+      <p className="text-[15px] font-medium text-stone-900">{title}</p>
+      <p className="mx-auto mt-1 max-w-sm text-sm text-pretty text-stone-500">{body}</p>
+      {view === "reply" && !q && <Link href={activeHref} className="mt-4 inline-block text-sm text-brand-700 underline-offset-4 hover:underline">See enquiries in progress</Link>}
+    </div>
   );
 }

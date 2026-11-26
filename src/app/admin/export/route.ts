@@ -2,7 +2,7 @@
 import type { EnquiryStatus, EnquiryType, PaymentProvider, PaymentStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
-import { detailRows, nairobiDay, statusLabel, typeLabel } from "../_lib/format";
+import { VIEWS, detailRows, nairobiDay, statusLabel, typeLabel } from "../_lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,10 @@ export async function GET(req: Request) {
     const rows = await db.enquiry.findMany({
       where: {
         type: (sp.get("type") as EnquiryType) || undefined,
-        status: (sp.get("status") as EnquiryStatus) || undefined,
+        status: (sp.get("status") as EnquiryStatus) || (() => {
+          const v = VIEWS.find((x) => x.value === sp.get("view"))?.statuses;
+          return v ? { in: v } : undefined;
+        })(),
         tripId: sp.get("trip") || undefined,
         createdAt: from || to
           ? { gte: from ? nairobiDay(from) : undefined, lt: to ? new Date(nairobiDay(to).getTime() + 86_400_000) : undefined }

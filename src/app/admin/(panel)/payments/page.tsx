@@ -1,12 +1,13 @@
 import Link from "next/link";
 import type { PaymentProvider, PaymentStatus, Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { Badge } from "../../_components/Badge";
-import { fmtDateTime, fmtMoney, nairobiMonthStart, statusColor, typeLabel } from "../../_lib/format";
+import { FilterSelect } from "../../_components/FilterSelect";
+import { StatusLabel } from "../../_components/StatusLabel";
+import { fmtDateTime, fmtMoney, nairobiMonthStart, paymentStatusLabel, typeLabel } from "../../_lib/format";
+import { btn } from "../../_lib/ui";
 
 const PROVIDERS: PaymentProvider[] = ["MPESA", "STRIPE"];
 const PSTATUS: PaymentStatus[] = ["PAID", "PENDING", "FAILED", "CANCELLED"];
-
 const PAGE_SIZE = 50;
 
 export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ provider?: string; status?: string; page?: string }> }) {
@@ -26,107 +27,95 @@ export default async function PaymentsPage({ searchParams }: { searchParams: Pro
   const sum = (rows: typeof totals, c: string) => rows.find((r) => r.currency === c)?._sum.amount ?? 0;
   const pages = Math.max(1, Math.ceil(count / PAGE_SIZE));
   const link = (patch: Record<string, string | undefined>) => {
-    const p = new URLSearchParams(Object.entries({ ...sp, page: undefined, ...patch }).filter(([, v]) => v) as [string, string][]);
+    const p = new URLSearchParams(Object.entries({ provider, status, ...patch }).filter(([, v]) => v) as [string, string][]);
     return `/admin/payments${p.size ? `?${p}` : ""}`;
   };
-  const pill = (active: boolean) =>
-    `inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full px-4 ring-1 sm:min-h-9 ${active ? "bg-teal-700 text-white ring-teal-700" : "bg-white ring-stone-200 hover:bg-stone-50"}`;
+  const exportHref = `/admin/export?kind=payments${provider ? `&provider=${provider}` : ""}${status ? `&status=${status}` : ""}`;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Payments</h1>
-          <p className="text-sm text-stone-600">M-Pesa (KES) and card (USD) payments for consultations and trips.</p>
+    <div>
+      <h1 className="text-2xl font-semibold">Payments</h1>
+
+      {/* received money: two periods, two currencies, read left to right */}
+      <dl className="mt-8 grid max-w-2xl grid-cols-2 gap-x-10 gap-y-6 sm:grid-cols-[auto_auto_1fr]">
+        <Total label="Received this month" kes={sum(monthTotals, "KES")} usd={sum(monthTotals, "USD")} />
+        <Total label="Received all time" kes={sum(totals, "KES")} usd={sum(totals, "USD")} />
+      </dl>
+
+      <div className="mt-12 flex flex-wrap items-center justify-between gap-3 border-b border-stone-200 pb-3">
+        <h2 className="text-[15px] font-semibold">All payments</h2>
+        <div className="flex flex-wrap gap-2">
+          <FilterSelect param="provider" label="Payment method" value={provider}
+            options={[{ value: "", label: "M-Pesa and card" }, { value: "MPESA", label: "M-Pesa only" }, { value: "STRIPE", label: "Card only" }]} />
+          <FilterSelect param="status" label="Payment status" value={status}
+            options={[{ value: "", label: "Any status" }, ...PSTATUS.map((s) => ({ value: s, label: paymentStatusLabel(s) }))]} />
         </div>
-        <a href={`/admin/export?kind=payments${provider ? `&provider=${provider}` : ""}${status ? `&status=${status}` : ""}`}
-          className="inline-flex min-h-11 items-center rounded-lg border border-stone-300 bg-white px-4 text-sm font-medium hover:bg-stone-50">Export CSV</a>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="KES this month" value={fmtMoney(sum(monthTotals, "KES"), "KES")} />
-        <Stat label="USD this month" value={fmtMoney(sum(monthTotals, "USD"), "USD")} />
-        <Stat label="KES all time" value={fmtMoney(sum(totals, "KES"), "KES")} />
-        <Stat label="USD all time" value={fmtMoney(sum(totals, "USD"), "USD")} />
-      </div>
-
-      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 text-sm sm:mx-0 sm:flex-wrap sm:px-0">
-        <Link href={link({ provider: undefined })} className={pill(!provider)}>All methods</Link>
-        <Link href={link({ provider: "MPESA" })} className={pill(provider === "MPESA")}>M-Pesa</Link>
-        <Link href={link({ provider: "STRIPE" })} className={pill(provider === "STRIPE")}>Card</Link>
-        <span className="mx-1 border-l border-stone-300" />
-        <Link href={link({ status: undefined })} className={pill(!status)}>Any status</Link>
-        {PSTATUS.map((s) => <Link key={s} href={link({ status: s })} className={pill(status === s)}>{s.toLowerCase()}</Link>)}
-      </div>
-
-      <ul className="space-y-2 sm:hidden">
-        {payments.map((p) => (
-          <li key={p.id}>
-            <Link href={`/admin/enquiries/${p.enquiryId}`} className="block rounded-xl bg-white p-4 ring-1 ring-stone-200 active:bg-stone-50">
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="truncate font-semibold text-teal-800">{p.enquiry.name}</p>
-                  <p className="text-sm text-stone-600">{typeLabel(p.enquiry.type)} · {p.provider === "MPESA" ? "M-Pesa" : "Card"}</p>
-                </div>
-                <p className="text-right font-semibold tabular-nums">{fmtMoney(p.amount, p.currency)}</p>
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-2 text-xs text-stone-600">
-                <Badge className={statusColor[p.status]}>{p.status.toLowerCase()}</Badge>
-                <span className="tabular-nums">{fmtDateTime(p.paidAt ?? p.createdAt)}</span>
-              </div>
-            </Link>
-          </li>
-        ))}
-        {payments.length === 0 && <li className="rounded-xl bg-white p-8 text-center text-stone-600 ring-1 ring-stone-200">No payments yet.</li>}
-      </ul>
-
-      <div className="hidden overflow-x-auto rounded-xl bg-white ring-1 ring-stone-200 sm:block">
-        <table className="w-full text-left text-sm">
-          <thead className="border-b border-stone-200 text-xs uppercase tracking-wide text-stone-600">
-            <tr>
-              <th className="px-4 py-3">Date</th><th className="px-4 py-3">Client</th><th className="px-4 py-3">For</th>
-              <th className="px-4 py-3">Method</th><th className="px-4 py-3 text-right">Amount</th>
-              <th className="px-4 py-3">Status</th><th className="px-4 py-3">Receipt / ref</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-stone-100">
-            {payments.map((p) => (
-              <tr key={p.id} className="hover:bg-stone-50">
-                <td className="whitespace-nowrap px-4 py-3 tabular-nums text-stone-600">{fmtDateTime(p.paidAt ?? p.createdAt)}</td>
-                <td className="px-4 py-3">
-                  <Link href={`/admin/enquiries/${p.enquiryId}`} className="font-medium text-teal-800 hover:underline">{p.enquiry.name}</Link>
-                  <div translate="no" className="whitespace-nowrap font-mono text-xs text-stone-600">{p.enquiry.reference}</div>
-                </td>
-                <td className="px-4 py-3">{typeLabel(p.enquiry.type)}</td>
-                <td className="px-4 py-3">{p.provider === "MPESA" ? "M-Pesa" : "Card"}</td>
-                <td className="whitespace-nowrap px-4 py-3 text-right font-medium tabular-nums">{fmtMoney(p.amount, p.currency)}</td>
-                <td className="px-4 py-3"><Badge className={statusColor[p.status]}>{p.status.toLowerCase()}</Badge></td>
-                <td className="px-4 py-3 font-mono text-xs text-stone-600">{p.mpesaReceipt ?? p.stripeSessionId?.slice(-12) ?? p.failureReason ?? "—"}</td>
+      {payments.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[40rem] text-left text-sm">
+            <thead className="text-stone-500">
+              <tr className="border-b border-stone-100">
+                <th scope="col" className="py-3 pr-6 font-normal">Client</th>
+                <th scope="col" className="py-3 pr-6 font-normal">Method</th>
+                <th scope="col" className="py-3 pr-6 text-right font-normal">Amount</th>
+                <th scope="col" className="py-3 pr-6 font-normal">Status</th>
+                <th scope="col" className="py-3 text-right font-normal">Date</th>
               </tr>
-            ))}
-            {payments.length === 0 && <tr><td colSpan={7} className="px-4 py-12 text-center text-stone-600">No payments yet.</td></tr>}
-          </tbody>
-        </table>
-      </div>
-
-      {pages > 1 && (
-        <div className="flex items-center justify-between text-sm">
-          <span className="tabular-nums text-stone-600">{count} payments · page {page} of {pages}</span>
-          <div className="flex gap-2">
-            {page > 1 && <Link href={link({ page: String(page - 1) })} className="inline-flex min-h-11 items-center rounded-md border bg-white px-4">← Newer</Link>}
-            {page < pages && <Link href={link({ page: String(page + 1) })} className="inline-flex min-h-11 items-center rounded-md border bg-white px-4">Older →</Link>}
-          </div>
+            </thead>
+            <tbody>
+              {payments.map((p) => (
+                <tr key={p.id} className="border-b border-stone-100 last:border-0">
+                  <td className="py-3.5 pr-6">
+                    <Link href={`/admin/enquiries/${p.enquiryId}`} className="font-medium text-stone-900 underline-offset-4 hover:text-brand-800 hover:underline">{p.enquiry.name}</Link>
+                    <span className="ml-2 text-stone-500">{typeLabel(p.enquiry.type)}</span>
+                  </td>
+                  <td className="py-3.5 pr-6 text-stone-600">
+                    {p.provider === "MPESA" ? "M-Pesa" : "Card"}
+                    {p.mpesaReceipt && <span translate="no" className="ml-2 text-stone-400 tabular-nums">{p.mpesaReceipt}</span>}
+                  </td>
+                  <td className="py-3.5 pr-6 text-right font-medium whitespace-nowrap tabular-nums">{fmtMoney(p.amount, p.currency)}</td>
+                  <td className="py-3.5 pr-6">
+                    <StatusLabel status={p.status}>{paymentStatusLabel(p.status)}</StatusLabel>
+                    {p.failureReason && <span className="mt-0.5 block text-[13px] text-stone-500">{p.failureReason}</span>}
+                  </td>
+                  <td className="py-3.5 text-right whitespace-nowrap text-stone-500 tabular-nums">{fmtDateTime(p.paidAt ?? p.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="py-20 text-center">
+          <p className="text-[15px] font-medium text-stone-900">{provider || status ? "No payments match these filters" : "No payments yet"}</p>
+          <p className="mx-auto mt-1 max-w-sm text-sm text-pretty text-stone-500">M-Pesa and card payments for consultations and trip bookings appear here as soon as clients pay.</p>
         </div>
       )}
+
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-sm text-stone-500">
+        <a href={exportHref} className={btn.quiet + " -ml-3"}>
+          <svg aria-hidden viewBox="0 0 24 24" className="size-4" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11m0 0l-4-4m4 4l4-4M5 20h14" /></svg>
+          Download as CSV
+        </a>
+        {pages > 1 && (
+          <div className="flex items-center gap-3">
+            <span className="tabular-nums">Page {page} of {pages}</span>
+            {page > 1 && <Link href={link({ page: String(page - 1) })} className={btn.secondary}>Newer</Link>}
+            {page < pages && <Link href={link({ page: String(page + 1) })} className={btn.secondary}>Older</Link>}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Total({ label, kes, usd }: { label: string; kes: number; usd: number }) {
   return (
-    <div className="rounded-xl bg-white p-4 ring-1 ring-stone-200">
-      <div className="text-xs text-stone-600">{label}</div>
-      <div className="mt-1 text-xl font-bold tabular-nums">{value}</div>
+    <div>
+      <dt className="text-sm text-stone-500">{label}</dt>
+      <dd className="mt-1.5 text-2xl font-semibold tabular-nums">{fmtMoney(kes, "KES")}</dd>
+      <dd className="mt-0.5 text-sm text-stone-600 tabular-nums">{fmtMoney(usd, "USD")} by card</dd>
     </div>
   );
 }

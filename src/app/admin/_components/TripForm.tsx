@@ -2,6 +2,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import type { Trip } from "@prisma/client";
 import { saveTrip, type TripFormState } from "../_lib/actions";
+import { btn, h2, input as uiInput, textarea as uiTextarea } from "../_lib/ui";
 
 const day = (d?: Date) => (d ? new Date(d).toISOString().slice(0, 10) : "");
 
@@ -26,21 +27,21 @@ export function TripForm({ trip }: { trip?: Trip }) {
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirty]);
 
-  const fieldCls = (name: string) =>
-    `mt-1 w-full rounded-md border bg-white px-3 py-2 text-base outline-none focus-visible:ring-2 focus-visible:ring-teal-700/40 sm:text-sm ${err(name) ? "border-rose-500" : "border-stone-300 focus-visible:border-teal-700"}`;
+  const fieldCls = (name: string, multiline = false) =>
+    `mt-1.5 ${multiline ? uiTextarea : uiInput} ${err(name) ? "border-rose-500 hover:border-rose-500" : ""}`;
 
   const describe = (name: string, help?: string) => (err(name) ? `${name}-err` : help ? `${name}-help` : undefined);
   const note = (name: string, help?: string) =>
     err(name) ? (
-      <span id={`${name}-err`} className="mt-1 block text-xs text-rose-700">{err(name)}</span>
+      <span id={`${name}-err`} className="mt-1.5 block text-[13px] text-rose-700">{err(name)}</span>
     ) : help ? (
-      <span id={`${name}-help`} className="mt-1 block text-xs text-stone-600">{help}</span>
+      <span id={`${name}-help`} className="mt-1.5 block text-[13px] text-stone-500">{help}</span>
     ) : null;
 
   type InputOpts = { type?: string; value?: string | number; help?: string; half?: boolean; placeholder?: string; required?: boolean; money?: boolean };
   const input = (name: string, label: string, o: InputOpts = {}) => (
     <label className={`block text-sm ${o.half ? "" : "sm:col-span-2"}`}>
-      <span className="font-medium">{label}{o.required && <span aria-hidden className="text-rose-600"> *</span>}</span>
+      <span className="font-medium text-stone-800">{label}{o.required && <span aria-hidden className="text-rose-600"> *</span>}</span>
       <input
         name={name} type={o.type ?? "text"} defaultValue={val(name, o.value)} placeholder={o.placeholder} required={o.required}
         aria-invalid={err(name) ? true : undefined} aria-describedby={describe(name, o.help)}
@@ -53,9 +54,9 @@ export function TripForm({ trip }: { trip?: Trip }) {
   );
   const area = (name: string, label: string, value: string, help?: string, required?: boolean) => (
     <label className="block text-sm sm:col-span-2">
-      <span className="font-medium">{label}{required && <span aria-hidden className="text-rose-600"> *</span>}</span>
+      <span className="font-medium text-stone-800">{label}{required && <span aria-hidden className="text-rose-600"> *</span>}</span>
       <textarea name={name} defaultValue={val(name, value)} rows={4} required={required}
-        aria-invalid={err(name) ? true : undefined} aria-describedby={describe(name, help)} className={fieldCls(name)} />
+        aria-invalid={err(name) ? true : undefined} aria-describedby={describe(name, help)} className={fieldCls(name, true)} />
       {note(name, help)}
     </label>
   );
@@ -68,12 +69,12 @@ export function TripForm({ trip }: { trip?: Trip }) {
       action={(fd) => { setDirty(false); action(fd); }}
       onChange={() => setDirty(true)}
       noValidate
-      className="space-y-6"
+      className="space-y-12"
     >
-      {state?.message && <p role="alert" className="rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{state.message}</p>}
+      {state?.message && <p role="alert" className="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-800">{state.message}</p>}
 
-      <fieldset className="grid gap-4 rounded-xl bg-white p-5 ring-1 ring-stone-200 sm:grid-cols-2">
-        <legend className="px-1 font-semibold">The trip</legend>
+      <fieldset className="grid gap-x-5 gap-y-6 sm:grid-cols-2">
+        <legend className={`mb-5 ${h2}`}>The trip</legend>
         {input("title", "Title", { value: trip?.title, placeholder: "Diani Beach Escape", required: true })}
         {input("destination", "Destination", { value: trip?.destination, half: true, placeholder: "Diani, Kenya", required: true })}
         {input("slug", "Web address", { value: trip?.slug, half: true, help: "fayreds…/trips/<this>. Leave empty to make it from the title." })}
@@ -85,22 +86,24 @@ export function TripForm({ trip }: { trip?: Trip }) {
         {input("imageUrl", "Photo link", { type: "url", value: trip?.imageUrl ?? "", placeholder: "https://…", help: "A link to a landscape photo (e.g. Cloudinary or a Google Photos share link)." })}
       </fieldset>
 
-      <fieldset className="grid gap-4 rounded-xl bg-white p-5 ring-1 ring-stone-200 sm:grid-cols-2">
-        <legend className="px-1 font-semibold">Prices (per person) and spots</legend>
+      <fieldset className="grid gap-x-5 gap-y-6 border-t border-stone-200 pt-10 sm:grid-cols-2">
+        <legend className={`mb-5 ${h2}`}>Prices per person and spots</legend>
         {input("priceKes", "Full price (KES): Kenyans", { type: "number", value: trip?.priceKes, half: true, required: true, money: true })}
         {input("priceUsd", "Full price (USD): international", { type: "number", value: trip?.priceUsd, half: true, required: true, money: true })}
         {input("depositKes", "Deposit (KES)", { type: "number", value: trip?.depositKes, half: true, required: true, money: true })}
         {input("depositUsd", "Deposit (USD)", { type: "number", value: trip?.depositUsd, half: true, required: true, money: true })}
         {input("totalSpots", "Total spots", { type: "number", value: trip?.totalSpots ?? 12, half: true, required: true, money: true })}
-        <label className="flex min-h-11 items-center gap-2 self-end text-sm">
-          <input type="checkbox" name="published" defaultChecked={state?.values ? state.values.published === "on" : trip?.published ?? true} className="h-5 w-5 accent-teal-700" />
-          <span className="font-medium">Show on the website</span>
+        <label className="flex h-10 items-center gap-2.5 self-end text-sm">
+          <input type="checkbox" name="published" defaultChecked={state?.values ? state.values.published === "on" : trip?.published ?? true} className="size-4 accent-brand-800" />
+          <span className="font-medium text-stone-800">Show on the website</span>
         </label>
       </fieldset>
 
-      <button disabled={pending} className="min-h-11 rounded-lg bg-teal-700 px-6 font-semibold text-white transition-[background-color,scale] hover:bg-teal-800 active:not-disabled:scale-[0.96] disabled:opacity-60 sm:min-w-40">
-        {pending ? "Saving…" : trip ? "Save changes" : "Create trip"}
-      </button>
+      <div className="border-t border-stone-200 pt-8">
+        <button disabled={pending} className={`${btn.primary} sm:min-w-40`}>
+          {pending ? "Saving…" : trip ? "Save changes" : "Create trip"}
+        </button>
+      </div>
     </form>
   );
 }
