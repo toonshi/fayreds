@@ -10,7 +10,7 @@ export function SiteFooter() {
     <footer className="bg-brand-950 text-brand-100">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-4">
         <div className="md:col-span-2">
-          <Logo light />
+          <Logo light photo />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-brand-200">{site.tagline}</p>
           <SocialIcons tone="light" className="mt-5" />
         </div>

@@ -25,11 +25,9 @@ export function SiteHeader() {
 
   const overlay = home && !scrolled && !open;
   const active = (href: string) => path === href || path.startsWith(href + "/");
-  const left = nav.slice(0, 3);
-  const right = nav.slice(3);
 
   const linkCls = (href: string) =>
-    `inline-flex min-h-11 items-center rounded-full px-3 text-[0.8rem] font-semibold uppercase tracking-[0.12em] transition-colors ${
+    `inline-flex min-h-11 items-center rounded-full px-2.5 text-[0.78rem] font-semibold uppercase tracking-[0.1em] xl:px-3 transition-colors ${
       overlay
         ? active(href) ? "text-white underline decoration-sun-400 decoration-2 underline-offset-8" : "text-white/90 hover:text-white"
         : active(href) ? "text-brand-900 underline decoration-sun-400 decoration-2 underline-offset-8" : "text-stone-700 hover:text-brand-900"
@@ -38,42 +36,37 @@ export function SiteHeader() {
   return (
     <header className={`${home ? "fixed" : "sticky"} inset-x-0 top-0 z-40 transition-[background-color,box-shadow,border-color] duration-300 ${
       overlay ? "border-b border-transparent bg-transparent" : "border-b border-stone-200/70 bg-sand-50/95 shadow-sm shadow-black/[0.03] backdrop-blur supports-[backdrop-filter]:bg-sand-50/85"}`}>
-      <div className="mx-auto grid max-w-6xl grid-cols-[1fr_auto_1fr] items-center gap-2 px-4 py-2.5">
-        <nav aria-label="Main" className="hidden lg:block">
-          <ul className="flex items-center gap-1">
-            {left.map((n) => <li key={n.href}><Link href={n.href} aria-current={active(n.href) ? "page" : undefined} className={linkCls(n.href)}>{n.label}</Link></li>)}
-          </ul>
-        </nav>
-        {/* phones: menu button on the left keeps the logo centred */}
-        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-nav"
-          className={`inline-flex h-11 w-11 items-center justify-center rounded-full lg:hidden ${overlay ? "text-white hover:bg-white/10" : "text-stone-800 hover:bg-stone-100"}`}>
-          <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
-          <span aria-hidden className="relative h-6 w-6">
-            {[{ d: "M4 7h16M4 12h16M4 17h16", on: !open }, { d: "M6 6l12 12M18 6L6 18", on: open }].map((i) => (
-              <svg key={i.d} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
-                className={`absolute inset-0 h-6 w-6 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${i.on ? "scale-100 opacity-100 blur-0" : "scale-[0.25] opacity-0 blur-[4px]"}`}>
-                <path d={i.d} />
-              </svg>
-            ))}
-          </span>
-        </button>
-
-        <Link href="/" className="justify-self-center rounded-lg">
-          <Logo light={overlay} />
+      <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5">
+        {/* logo top left */}
+        <Link href="/" className="shrink-0 rounded-lg">
+          <Logo light={overlay} photo />
         </Link>
 
-        <div className="flex items-center justify-end gap-1">
-          <nav aria-label="More" className="hidden lg:block">
-            <ul className="flex items-center gap-1">
-              {right.map((n) => <li key={n.href}><Link href={n.href} aria-current={active(n.href) ? "page" : undefined} className={linkCls(n.href)}>{n.label}</Link></li>)}
+        <div className="flex items-center gap-1">
+          <nav aria-label="Main" className="hidden lg:block">
+            <ul className="flex items-center gap-0.5 xl:gap-1">
+              {nav.map((n) => <li key={n.href}><Link href={n.href} aria-current={active(n.href) ? "page" : undefined} className={linkCls(n.href)}>{n.label}</Link></li>)}
             </ul>
           </nav>
           <Link href="/consultation"
-            className={`ml-1 hidden min-h-11 items-center rounded-full px-4 text-sm font-semibold transition-[background-color,color,scale] active:scale-[0.96] sm:inline-flex ${
+            className={`ml-2 hidden min-h-11 items-center rounded-full px-4 text-sm font-semibold transition-[background-color,color,scale] active:scale-[0.96] sm:inline-flex ${
               overlay ? "bg-white/15 text-white ring-1 ring-white/40 backdrop-blur hover:bg-white hover:text-brand-900" : "bg-brand-800 text-white hover:bg-brand-900"}`}>
             Book
             <span className="sr-only"> a consultation</span>
           </Link>
+          {/* phones and tablets: menu button on the right */}
+          <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-controls="mobile-nav"
+            className={`inline-flex h-11 w-11 items-center justify-center rounded-full lg:hidden ${overlay ? "text-white hover:bg-white/10" : "text-stone-800 hover:bg-stone-100"}`}>
+            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+            <span aria-hidden className="relative h-6 w-6">
+              {[{ d: "M4 7h16M4 12h16M4 17h16", on: !open }, { d: "M6 6l12 12M18 6L6 18", on: open }].map((i) => (
+                <svg key={i.d} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                  className={`absolute inset-0 h-6 w-6 transition-[opacity,scale,filter] duration-300 ease-[cubic-bezier(0.2,0,0,1)] ${i.on ? "scale-100 opacity-100 blur-0" : "scale-[0.25] opacity-0 blur-[4px]"}`}>
+                  <path d={i.d} />
+                </svg>
+              ))}
+            </span>
+          </button>
         </div>
       </div>
 

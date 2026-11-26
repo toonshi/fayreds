@@ -1,8 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="4 4 88 88">
-  <rect x="4" y="4" width="88" height="88" rx="24" fill="#0f4c4a"/>
-  <circle cx="48" cy="54" r="22" fill="#f2a541"/>
-  <rect x="4" y="56" width="88" height="36" fill="#0f4c4a"/>
-  <path d="M16 60c8-6 16-6 24 0s16 6 24 0 12-5 16-2" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
-  <path d="M24 74c6-4 12-4 18 0s12 4 18 0" fill="none" stroke="#7fc9bf" stroke-width="6" stroke-linecap="round"/>
-  <path d="M58 26l14-6-6 14-3-5z" fill="#fff"/>
+  <clipPath id="c"><rect x="4" y="4" width="88" height="88" rx="24"/></clipPath>
+  <g clip-path="url(#c)">
+    <rect x="4" y="4" width="88" height="88" fill="#0f4c4a"/>
+    <circle cx="48" cy="54" r="22" fill="#f2a541"/>
+    <rect x="4" y="56" width="88" height="36" fill="#0f4c4a"/>
+    <path d="M16 60c8-6 16-6 24 0s16 6 24 0 12-5 16-2" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round"/>
+    <path d="M24 74c6-4 12-4 18 0s12 4 18 0" fill="none" stroke="#7fc9bf" stroke-width="6" stroke-linecap="round"/>
+    <path d="M58 26l14-6-6 14-3-5z" fill="#fff"/>
+  </g>
 </svg>
