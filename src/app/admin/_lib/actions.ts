@@ -7,6 +7,9 @@ import type { EnquiryStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { checkPassword, createSession, deleteSession, requireAdmin } from "@/lib/auth";
 import { STATUSES } from "./format";
+import { sendSms } from "@/lib/sms";
+import { sendEmail, escapeHtml } from "@/lib/email";
+import { site } from "@/lib/site";
 
 // ---------- auth ----------
 export async function login(_: { error?: string } | undefined, form: FormData) {
@@ -37,6 +40,61 @@ export async function updateEnquiry(id: string, _: EnquiryFormState, form: FormD
   revalidatePath(`/admin/enquiries/${id}`);
   revalidatePath("/admin");
   return { ok: true, savedAt: Date.now() };
+}
+
+// ---------- reply to a customer ----------
+export type ReplyState = { ok?: boolean; error?: string; result?: string; sentAt?: number } | undefined;
+
+/**
+ * Sends Faith's reply to the customer by SMS (Africa's Talking) and/or email, from inside the admin.
+ * Every reply is logged at the top of the private notes, and a NEW enquiry moves to "In progress".
+ */
+export async function replyToEnquiry(id: string, _: ReplyState, form: FormData): Promise<ReplyState> {
+  await requireAdmin();
+  const message = String(form.get("message") ?? "").trim().slice(0, 2000);
+  const bySms = form.get("sms") === "on";
+  const byEmail = form.get("email") === "on";
+  if (!message) return { error: "Write a message first." };
+  if (!bySms && !byEmail) return { error: "Choose SMS, email or both." };
+
+  const e = await db.enquiry.findUnique({ where: { id } });
+  if (!e) return { error: "This enquiry no longer exists." };
+
+  const outcome: string[] = [];
+  const sentVia: string[] = [];
+
+  if (bySms) {
+    const r = await sendSms(e.phone, message);
+    if (r.sent) { outcome.push("SMS sent"); sentVia.push("SMS"); }
+    else if (r.info.startsWith("demo")) outcome.push("SMS not sent: Africa's Talking keys aren't set (demo mode)");
+    else if (r.info.startsWith("international")) outcome.push("SMS not sent: SMS only goes to Kenyan numbers");
+    else outcome.push(`SMS failed (${r.info})`);
+  }
+
+  if (byEmail) {
+    const subject = String(form.get("subject") ?? "").trim().slice(0, 150) || `Re: your request ${e.reference}`;
+    const html = `<p>${escapeHtml(message).replace(/\n/g, "<br>")}</p><p>Faith<br>${escapeHtml(site.name)}</p>`;
+    const r = await sendEmail(e.email, subject, `Your request ${e.reference}`, html);
+    if (r.sent) { outcome.push("Email sent"); sentVia.push("email"); }
+    else if (!process.env.SMTP_HOST) outcome.push("Email not sent: email settings aren't set (demo mode)");
+    else outcome.push("Email failed. Check the email settings and try again.");
+  }
+
+  if (sentVia.length) {
+    const stamp = new Date().toLocaleString("en-GB", { timeZone: "Africa/Nairobi", day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    const log = `[${stamp}] Replied by ${sentVia.join(" + ")}: "${message}"`;
+    await db.enquiry.update({
+      where: { id },
+      data: {
+        notes: (log + (e.notes ? `\n\n${e.notes}` : "")).slice(0, 5000),
+        ...(e.status === "NEW" ? { status: "IN_PROGRESS" as EnquiryStatus } : {}),
+      },
+    });
+    revalidatePath(`/admin/enquiries/${id}`);
+    revalidatePath("/admin");
+  }
+
+  return { ok: sentVia.length > 0, result: outcome.join(" · "), sentAt: Date.now() };
 }
 
 // ---------- trips ----------
