@@ -6,10 +6,11 @@ import { Badge } from "../../../_components/Badge";
 import { EnquiryManageForm } from "../../../_components/EnquiryManageForm";
 import { BackLink } from "../../../_components/BackLink";
 import { ReplyForm } from "../../../_components/ReplyForm";
+import { ContactButtons, PrefBadge } from "../../../_components/ContactButtons";
 import { DealsPanel } from "../../../_components/DealsPanel";
 import { CATEGORY_LABEL, matchOffers, needsFromDetails, suggestPackage } from "@/lib/deals";
 import {
-  detailRows, fmtDate, fmtDateTime, fmtMoney, statusColor, statusLabel, typeColor, typeLabel, waNumber,
+  contactPref, detailRows, fmtDate, fmtDateTime, fmtPayment, keyFacts, statusColor, statusLabel, typeColor, typeLabel,
 } from "../../../_lib/format";
 
 export default async function EnquiryPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +22,9 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
   if (!e) notFound();
 
   const firstName = e.name.split(" ")[0];
-  const waText = `Hi ${firstName}, this is Faith from ${site.name} about your ${typeLabel(e.type).toLowerCase()} request (${e.reference}).`;
+  const pref = contactPref(e);
+  const facts = keyFacts(e.type, e.details, e.trip, e.spots);
+  const message = (e.details as Record<string, unknown> | null)?.message;
   const what = typeLabel(e.type).toLowerCase();
 
   // deal finder (consultations only)
@@ -55,41 +58,61 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
           <div className="flex flex-wrap items-center gap-2">
             <Badge className={typeColor[e.type]}>{typeLabel(e.type)}</Badge>
             <Badge className={statusColor[e.status]}>{statusLabel(e.status)}</Badge>
+            <PrefBadge pref={pref} />
             <span translate="no" className="whitespace-nowrap font-mono text-xs text-stone-600">{e.reference}</span>
           </div>
           <h1 className="mt-2 text-2xl font-bold break-words">{e.name}</h1>
           <p className="text-sm text-stone-600">Received {fmtDateTime(e.createdAt)} · {e.country}</p>
         </div>
-        <div className="flex flex-wrap gap-2 text-sm font-medium">
-          <a href={`https://wa.me/${waNumber(e.phone)}?text=${encodeURIComponent(waText)}`} target="_blank" rel="noreferrer"
-            className="inline-flex min-h-11 items-center rounded-lg bg-emerald-700 px-4 text-white hover:bg-emerald-800">WhatsApp</a>
-          <a href={`tel:${e.phone}`} className="inline-flex min-h-11 items-center rounded-lg border border-stone-300 bg-white px-4 hover:bg-stone-50">Call</a>
-          <a href={`mailto:${e.email}?subject=${encodeURIComponent(`${site.name}: your request ${e.reference}`)}`}
-            className="inline-flex min-h-11 items-center rounded-lg border border-stone-300 bg-white px-4 hover:bg-stone-50">Email</a>
-        </div>
+        <ContactButtons name={e.name} phone={e.phone} email={e.email} reference={e.reference} what={what} pref={pref} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <ReplyForm id={e.id} firstName={firstName} reference={e.reference} smsAvailable={smsAvailable} templates={templates} />
-
-          {isConsult && (
-            <DealsPanel enquiryId={e.id} firstName={firstName} needs={needs} matches={matches} pkg={pkg} picks={e.offerPicks} hasOffers={offers.length > 0} />
-          )}
-
-          <section className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
-            <h2 className="font-semibold">Contact</h2>
-            <dl className="mt-3 grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2">
+          <section aria-labelledby="glance" className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
+            <h2 id="glance" className="font-semibold">At a glance</h2>
+            <dl className="mt-3 grid gap-x-6 gap-y-3 text-sm sm:grid-cols-2">
+              {facts.map(([label, value]) => <Row key={label} label={label} value={value} />)}
               <Row label="Phone" value={e.phone} />
               <Row label="Email" value={e.email} />
               <Row label="Country" value={e.country} />
-              {e.trip && <Row label="Trip" value={`${e.trip.title} (${fmtDate(e.trip.startDate)})`} />}
-              {e.spots != null && <Row label="Spots" value={String(e.spots)} />}
+              <Row label="Contact by" value={pref.stated ? pref.via : `Not asked (${pref.via} suggested)`} />
+              {e.trip && <Row label="Trip dates" value={fmtDate(e.trip.startDate)} />}
             </dl>
+            {typeof message === "string" && message.trim() && (
+              <blockquote className="mt-4 whitespace-pre-wrap break-words rounded-lg bg-stone-50 p-4 text-sm text-stone-800 ring-1 ring-stone-200">
+                <span className="mb-1 block text-xs font-semibold uppercase tracking-wide text-stone-600">Their message</span>
+                {message}
+              </blockquote>
+            )}
           </section>
 
-          <section className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
-            <h2 className="font-semibold">Answers</h2>
+          <section aria-labelledby="pay" className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
+            <h2 id="pay" className="font-semibold">Payments</h2>
+            {e.payments.length === 0 ? (
+              <p className="mt-2 text-sm text-stone-600">
+                {e.type === "CONSULTATION" || e.type === "RESERVATION" ? "No payment started yet." : "No payment for this kind of request."}
+              </p>
+            ) : (
+              <ul className="mt-3 divide-y divide-stone-100 text-sm">
+                {e.payments.map((p) => (
+                  <li key={p.id} className="grid gap-1 py-3 sm:grid-cols-[1fr_auto] sm:items-center">
+                    <div>
+                      <p className="font-semibold tabular-nums">{fmtPayment(p)} <span className="font-normal text-stone-600">· {p.provider === "MPESA" ? "M-Pesa" : "Card"}</span></p>
+                      <p className="text-xs text-stone-600">{p.description}{p.mpesaReceipt ? ` · Receipt ${p.mpesaReceipt}` : ""}{p.failureReason ? ` · ${p.failureReason}` : ""}</p>
+                    </div>
+                    <span className="flex items-center gap-2">
+                      <Badge className={statusColor[p.status]}>{p.status === "PAID" ? "Paid" : p.status.toLowerCase()}</Badge>
+                      <span className="text-xs tabular-nums text-stone-600">{fmtDateTime(p.paidAt ?? p.createdAt)}</span>
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+
+          <section aria-labelledby="answers" className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
+            <h2 id="answers" className="font-semibold">All answers</h2>
             <dl className="mt-3 divide-y divide-stone-100 text-sm">
               {detailRows(e.type, e.details).map(([label, value]) => (
                 <div key={label} className="grid gap-1 py-2 sm:grid-cols-3">
@@ -100,23 +123,11 @@ export default async function EnquiryPage({ params }: { params: Promise<{ id: st
             </dl>
           </section>
 
-          {e.payments.length > 0 && (
-            <section className="rounded-xl bg-white p-5 ring-1 ring-stone-200">
-              <h2 className="font-semibold">Payments</h2>
-              <ul className="mt-3 divide-y divide-stone-100 text-sm">
-                {e.payments.map((p) => (
-                  <li key={p.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                    <span className="tabular-nums">{p.provider === "MPESA" ? "M-Pesa" : "Card"} · {fmtMoney(p.amount, p.currency)}</span>
-                    <span className="text-xs text-stone-600">{p.mpesaReceipt ?? p.failureReason ?? ""}</span>
-                    <span className="flex items-center gap-2">
-                      <Badge className={statusColor[p.status]}>{p.status.toLowerCase()}</Badge>
-                      <span className="text-xs text-stone-600">{fmtDateTime(p.paidAt ?? p.createdAt)}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+          {isConsult && (
+            <DealsPanel enquiryId={e.id} firstName={firstName} needs={needs} matches={matches} pkg={pkg} picks={e.offerPicks} hasOffers={offers.length > 0} />
           )}
+
+          <ReplyForm id={e.id} firstName={firstName} reference={e.reference} smsAvailable={smsAvailable} templates={templates} />
         </div>
 
         <aside className="order-first lg:order-none">

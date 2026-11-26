@@ -2,7 +2,7 @@
 import type { EnquiryStatus, EnquiryType, PaymentProvider, PaymentStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { isAdmin } from "@/lib/auth";
-import { detailRows, nairobiDay, statusLabel, typeLabel } from "../_lib/format";
+import { contactPref, detailRows, nairobiDay, paymentAmount, statusLabel, summaryLine, typeLabel } from "../_lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -42,9 +42,10 @@ export async function GET(req: Request) {
       include: { trip: { select: { title: true } } },
     });
     csv = toCsv([
-      ["Reference", "Received", "Type", "Status", "Name", "Email", "Phone", "Country", "Trip", "Spots", "Answers", "Notes"],
+      ["Reference", "Received", "Type", "Status", "Name", "Email", "Phone", "Country", "Prefers", "Summary", "Trip", "Spots", "Answers", "Notes"],
       ...rows.map((e) => [
         e.reference, e.createdAt, typeLabel(e.type), statusLabel(e.status), e.name, e.email, e.phone, e.country,
+        (() => { const p = contactPref(e); return p.stated ? p.via : `${p.via} (guess)`; })(), summaryLine(e.type, e.details, e.trip, e.spots),
         e.trip?.title ?? "", e.spots ?? "", detailRows(e.type, e.details).map(([k, v]) => `${k}: ${v}`).join("\n"), e.notes ?? "",
       ]),
     ]);
@@ -61,7 +62,7 @@ export async function GET(req: Request) {
       ["Date", "Paid at", "Enquiry reference", "Client", "Phone", "For", "Method", "Status", "Currency", "Amount", "M-Pesa receipt", "Stripe session", "Description"],
       ...rows.map((p) => [
         p.createdAt, p.paidAt ?? "", p.enquiry.reference, p.enquiry.name, p.enquiry.phone, typeLabel(p.enquiry.type),
-        p.provider === "MPESA" ? "M-Pesa" : "Card", p.status, p.currency, p.amount, p.mpesaReceipt ?? "", p.stripeSessionId ?? "", p.description,
+        p.provider === "MPESA" ? "M-Pesa" : "Card", p.status, p.currency, paymentAmount(p), p.mpesaReceipt ?? "", p.stripeSessionId ?? "", p.description,
       ]),
     ]);
   }
