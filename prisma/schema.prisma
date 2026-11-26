@@ -52,6 +52,7 @@ model Enquiry {
   trip      Trip?         @relation(fields: [tripId], references: [id])
   spots     Int?
   payments  Payment[]
+  offerPicks OfferPick[]
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 
@@ -96,4 +97,64 @@ model Trip {
   enquiries   Enquiry[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+// ---------- Deal finder: partner offers and what Faith picked for each client ----------
+
+enum OfferCategory {
+  STAY
+  ACTIVITY
+  TRANSPORT
+  DINING
+  NIGHTLIFE
+  OTHER
+}
+
+enum PriceUnit {
+  PER_PERSON
+  PER_NIGHT
+  PER_GROUP
+}
+
+enum PickStatus {
+  SUGGESTED
+  BOOKED
+}
+
+/// A deal from a partner (hotel, Airbnb, paragliding, transfers...) that Faith can offer clients.
+model Offer {
+  id            String        @id @default(cuid())
+  title         String
+  partner       String
+  category      OfferCategory
+  location      String
+  priceKes      Int
+  unit          PriceUnit     @default(PER_PERSON)
+  maxGuests     Int?
+  tags          String[]
+  commissionPct Int           @default(0)
+  bookingUrl    String?
+  notes         String?
+  active        Boolean       @default(true)
+  picks         OfferPick[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([category, active])
+}
+
+/// An offer Faith booked for a client: the record behind her commission.
+model OfferPick {
+  id            String     @id @default(cuid())
+  enquiryId     String
+  enquiry       Enquiry    @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  offerId       String
+  offer         Offer      @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  status        PickStatus @default(BOOKED)
+  amountKes     Int        /// estimated total for the client's group
+  commissionKes Int
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@unique([enquiryId, offerId])
 }
