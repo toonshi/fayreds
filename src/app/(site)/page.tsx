@@ -65,34 +65,34 @@ export default async function HomePage() {
         <div aria-hidden className="pointer-events-none absolute -right-40 -top-40 h-[34rem] w-[34rem] rounded-full bg-sun-200/60 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-48 -left-32 h-[30rem] w-[30rem] rounded-full bg-brand-100/70 blur-3xl" />
         <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-12 sm:pt-20 lg:grid-cols-2">
-          <div>
-            <p className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-brand-800 ring-1 ring-brand-100">
+          <div className="intro">
+            <p style={{ ["--d" as string]: 0 }} className="inline-flex items-center gap-2 rounded-full bg-white px-3 py-1 text-sm font-medium text-brand-800 ring-1 ring-brand-100">
               <span aria-hidden className="h-2 w-2 rounded-full bg-sun-400" /> Travel creator · Hospitality insider
             </p>
-            <h1 className="mt-5 text-4xl font-bold leading-[1.05] text-stone-900 sm:text-6xl">
+            <h1 style={{ ["--d" as string]: 1 }} className="mt-5 text-4xl font-bold leading-[1.05] text-stone-900 sm:text-6xl">
               Travel smarter with <span className="text-brand-800">Faith</span>
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-relaxed text-stone-700">{bio.short}</p>
+            <p style={{ ["--d" as string]: 2 }} className="mt-5 max-w-xl text-lg leading-relaxed text-stone-700">{bio.short}</p>
 
-            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
-              <Link href="/consultation" className="rounded-full bg-brand-800 px-6 py-3.5 text-center font-semibold text-white shadow-sm transition-[background-color,scale] hover:bg-brand-900 active:scale-[0.96]">
+            <div style={{ ["--d" as string]: 3 }} className="mt-8 grid gap-3 sm:flex sm:flex-wrap">
+              <Link href="/consultation" className="rounded-full bg-brand-800 px-6 py-3.5 text-center font-semibold text-white shadow-sm transition-[background-color,scale,translate,box-shadow] hover:-translate-y-0.5 hover:shadow-md hover:bg-brand-900 active:scale-[0.96]">
                 Travel Consultation
               </Link>
-              <Link href="/marketing" className="rounded-full bg-sun-400 px-6 py-3.5 text-center font-semibold text-brand-950 shadow-sm transition-[background-color,scale] hover:bg-sun-300 active:scale-[0.96]">
+              <Link href="/marketing" className="rounded-full bg-sun-400 px-6 py-3.5 text-center font-semibold text-brand-950 shadow-sm transition-[background-color,scale,translate,box-shadow] hover:-translate-y-0.5 hover:shadow-md hover:bg-sun-300 active:scale-[0.96]">
                 Marketing
               </Link>
-              <Link href="/partnership" className="rounded-full px-6 py-3.5 text-center font-semibold text-brand-900 ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">
+              <Link href="/partnership" className="rounded-full px-6 py-3.5 text-center font-semibold text-brand-900 ring-1 ring-stone-300 bg-white transition-[background-color,scale,translate,box-shadow] hover:-translate-y-0.5 hover:shadow-md hover:bg-brand-50 active:scale-[0.96]">
                 Partnerships
               </Link>
             </div>
 
-            <div className="mt-8 flex flex-wrap items-center gap-4">
+            <div style={{ ["--d" as string]: 4 }} className="mt-8 flex flex-wrap items-center gap-4">
               <SocialIcons />
               <span className="text-sm text-stone-600">Follow the journey</span>
             </div>
           </div>
 
-          <div className="relative mx-auto w-full max-w-md lg:max-w-none">
+          <div className="intro-media relative mx-auto w-full max-w-md lg:max-w-none">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] bg-gradient-to-b from-sun-200 via-sun-300 to-brand-700 shadow-xl">
               {bio.photo ? (
                 <Image src={bio.photo} alt={bio.photoAlt} fill priority sizes="(min-width: 1024px) 560px, 90vw"
@@ -147,11 +147,11 @@ export default async function HomePage() {
       <section className="bg-white py-16 sm:py-20" aria-labelledby="services">
         <div className="mx-auto max-w-6xl px-4">
           <p className="text-sm font-semibold uppercase tracking-widest text-brand-700">What Faith does</p>
-          <h2 id="services" className="mt-2 max-w-2xl text-3xl font-bold text-stone-900 sm:text-4xl">Three ways to work with Fayreds Travel</h2>
+          <h2 id="services" className="reveal mt-2 max-w-2xl text-3xl font-bold text-stone-900 sm:text-4xl">Three ways to work with Fayreds Travel</h2>
           <ul className="mt-10 grid gap-6 lg:grid-cols-3">
-            {services.map((s) => (
-              <li key={s.href} className="flex">
-                <div className="flex flex-1 flex-col rounded-3xl bg-sand-50 p-7 ring-1 ring-stone-200">
+            {services.map((s, i) => (
+              <li key={s.href} className="reveal flex" style={{ ["--i" as string]: i }}>
+                <div className="group flex flex-1 flex-col rounded-3xl bg-sand-50 p-7 ring-1 ring-stone-200 transition-[translate,box-shadow,background-color] duration-300 ease-out hover:-translate-y-1.5 hover:bg-white hover:shadow-xl hover:shadow-brand-900/10">
                   <p className="text-sm font-medium text-stone-600">{s.eyebrow}</p>
                   <h3 className="mt-1 font-display text-2xl font-bold text-stone-900">{s.title}</h3>
                   <p className="mt-3 text-stone-700">{s.text}</p>
@@ -182,6 +182,7 @@ export default async function HomePage() {
         intro="Where to eat, where to stay and what to do, filmed on the spot. Tap a video to play it here."
         videos={videos}
         showAllLink
+        layout="carousel"
         tone="sand"
       />
 
@@ -194,12 +195,12 @@ export default async function HomePage() {
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-widest text-brand-700">Travel with Faith</p>
-                <h2 id="trips" className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">Upcoming group trips</h2>
+                <h2 id="trips" className="reveal mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">Upcoming group trips</h2>
               </div>
               <Link href="/trips" className="inline-flex min-h-11 items-center gap-1 font-semibold text-brand-800 hover:underline">See all trips <Icon name="arrowRight" /></Link>
             </div>
             <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {trips.map((t, i) => <li key={t.id} className="flex"><TripCard trip={t} spotsLeft={left[i]} headingLevel={3} /></li>)}
+              {trips.map((t, i) => <li key={t.id} className="reveal flex" style={{ ["--i" as string]: i }}><TripCard trip={t} spotsLeft={left[i]} headingLevel={3} /></li>)}
             </ul>
           </div>
         </section>
@@ -209,10 +210,10 @@ export default async function HomePage() {
       <section className="bg-brand-900 py-16 text-white sm:py-20" aria-labelledby="how">
         <div className="mx-auto max-w-6xl px-4">
           <p className="text-sm font-semibold uppercase tracking-widest text-sun-300">How a consultation works</p>
-          <h2 id="how" className="mt-2 max-w-2xl text-3xl font-bold sm:text-4xl">From &ldquo;where should I go?&rdquo; to a plan you&apos;re excited about</h2>
+          <h2 id="how" className="reveal mt-2 max-w-2xl text-3xl font-bold sm:text-4xl">From &ldquo;where should I go?&rdquo; to a plan you&apos;re excited about</h2>
           <ol className="mt-10 grid gap-6 md:grid-cols-3">
             {steps.map((s, i) => (
-              <li key={s.title} className="rounded-3xl bg-white/5 p-6 ring-1 ring-white/10">
+              <li key={s.title} className="reveal rounded-3xl bg-white/5 p-6 ring-1 ring-white/10 transition-[background-color,translate] duration-300 ease-out hover:-translate-y-1 hover:bg-white/10" style={{ ["--i" as string]: i }}>
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-sun-400 font-bold text-brand-950" aria-hidden>{i + 1}</span>
                 <h3 className="mt-4 text-lg font-semibold">{s.title}</h3>
                 <p className="mt-2 text-brand-100">{s.text}</p>
@@ -228,13 +229,13 @@ export default async function HomePage() {
       {/* ---------- About teaser ---------- */}
       <section className="py-16 sm:py-20" aria-labelledby="about">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 lg:grid-cols-5">
-          <div className="lg:col-span-3">
+          <div className="reveal lg:col-span-3">
             <p className="text-sm font-semibold uppercase tracking-widest text-brand-700">Meet Faith</p>
             <h2 id="about" className="mt-2 text-3xl font-bold text-stone-900 sm:text-4xl">{bio.headline}</h2>
             <p className="mt-4 text-lg leading-relaxed text-stone-700">{bio.long[0]}</p>
             <Link href="/about" className="mt-4 inline-flex min-h-11 items-center gap-1 font-semibold text-brand-800 hover:underline">More about Faith & FAQs <Icon name="arrowRight" /></Link>
           </div>
-          <div className="rounded-3xl bg-white p-7 ring-1 ring-stone-200 lg:col-span-2">
+          <div className="reveal rounded-3xl bg-white p-7 ring-1 ring-stone-200 lg:col-span-2">
             <h3 className="font-display text-xl font-bold text-stone-900">Questions first?</h3>
             <p className="mt-2 text-stone-700">Send Faith a message. She answers personally.</p>
             <div className="mt-5 grid gap-3">

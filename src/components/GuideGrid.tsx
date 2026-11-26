@@ -25,7 +25,7 @@ export function GuideGrid({ videos, thumbs }: { videos: Video[]; thumbs: Record<
       </div>
       <p className="sr-only" aria-live="polite">{shown.length} guides shown</p>
       <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-5">
-        {shown.map((v) => <li key={v.id}><TikTokCard video={v} thumbnail={thumbs[v.id]} /></li>)}
+        {shown.map((v, i) => <li key={v.id} className="reveal" style={{ ["--i" as string]: i % 5 }}><TikTokCard video={v} thumbnail={thumbs[v.id]} /></li>)}
       </ul>
     </>
   );

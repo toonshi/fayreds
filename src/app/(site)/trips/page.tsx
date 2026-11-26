@@ -39,7 +39,7 @@ export default async function TripsPage() {
         {trips.length > 0 ? (
           <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {trips.map((t, i) => (
-              <li key={t.id} className="flex"><TripCard trip={t} spotsLeft={left[i]} /></li>
+              <li key={t.id} className="reveal flex" style={{ ["--i" as string]: i % 3 }}><TripCard trip={t} spotsLeft={left[i]} /></li>
             ))}
           </ul>
         ) : (

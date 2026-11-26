@@ -3,22 +3,25 @@ import Link from "next/link";
 import { getTikTokMeta, type TikTokMeta } from "@/lib/tiktok";
 import { TIKTOK_PROFILE, videoUrl, type Video } from "@/content/videos";
 import { TikTokCard } from "./TikTokCard";
+import { Carousel } from "./Carousel";
 import { Icon } from "./Icon";
 
-export async function VideoGuides({ videos, title, intro, id = "guides", showAllLink = false, tone = "white" }: {
+export async function VideoGuides({ videos, title, intro, id = "guides", showAllLink = false, tone = "white", layout = "grid" }: {
   videos: Video[];
   title: string;
   intro?: string;
   id?: string;
   showAllLink?: boolean;
   tone?: "white" | "sand";
+  /** carousel: swipeable row with buttons (home); grid: everything visible (marketing) */
+  layout?: "grid" | "carousel";
 }) {
   if (videos.length === 0) return null;
   const metas: TikTokMeta[] = await Promise.all(videos.map((v) => (v.cover ? {} : getTikTokMeta(videoUrl(v.id)))));
   return (
     <section aria-labelledby={id} className={tone === "sand" ? "bg-sand-100 py-16 sm:py-20" : "bg-white py-16 sm:py-20"}>
       <div className="mx-auto max-w-6xl px-4">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="reveal flex flex-wrap items-end justify-between gap-4">
           <div className="max-w-2xl">
             <h2 id={id} className="font-display text-3xl font-bold text-stone-900 sm:text-4xl">{title}</h2>
             {intro && <p className="mt-3 text-lg text-stone-700">{intro}</p>}
@@ -33,14 +36,22 @@ export async function VideoGuides({ videos, title, intro, id = "guides", showAll
             </a>
           )}
         </div>
-        {/* phones: swipe sideways; larger screens: a grid */}
-        <ul className={`-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-3 sm:overflow-visible sm:px-0 ${videos.length > 3 ? "lg:grid-cols-5" : ""}`}>
-          {videos.map((v, i) => (
-            <li key={v.id} className="w-[72%] shrink-0 snap-start sm:w-auto">
-              <TikTokCard video={v} thumbnail={metas[i].thumbnail} />
-            </li>
-          ))}
-        </ul>
+        {layout === "carousel" ? (
+          <div className={`reveal mt-8 ${tone === "sand" ? "[&_[role=region]]:[--carousel-bg:var(--color-sand-100)]" : ""}`}>
+            <Carousel label="Video guides">
+              {videos.map((v, i) => <TikTokCard key={v.id} video={v} thumbnail={metas[i].thumbnail} />)}
+            </Carousel>
+          </div>
+        ) : (
+          /* phones: swipe sideways; larger screens: a grid */
+          <ul className={`-mx-4 mt-8 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:snap-none sm:grid-cols-3 sm:overflow-visible sm:px-0 ${videos.length > 3 ? "lg:grid-cols-5" : ""}`}>
+            {videos.map((v, i) => (
+              <li key={v.id} className="reveal w-[72%] shrink-0 snap-start sm:w-auto" style={{ ["--i" as string]: i }}>
+                <TikTokCard video={v} thumbnail={metas[i].thumbnail} />
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );

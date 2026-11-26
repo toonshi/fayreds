@@ -11,8 +11,8 @@ export function TikTokCard({ video, thumbnail }: { video: Video; thumbnail?: str
   const url = videoUrl(video.id);
 
   return (
-    <figure className="flex h-full flex-col">
-      <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-brand-900 shadow-sm ring-1 ring-black/5">
+    <figure className="group/card flex h-full flex-col">
+      <div className="relative aspect-[9/16] overflow-hidden rounded-2xl bg-brand-900 shadow-sm ring-1 ring-black/5 transition-[translate,box-shadow] duration-300 ease-out group-hover/card:-translate-y-1.5 group-hover/card:shadow-xl group-hover/card:shadow-brand-900/20">
         {playing ? (
           <iframe
             src={`https://www.tiktok.com/player/v1/${video.id}?autoplay=1&rel=0&description=1&music_info=1`}
@@ -27,7 +27,7 @@ export function TikTokCard({ video, thumbnail }: { video: Video; thumbnail?: str
             {cover ? (
               // eslint-disable-next-line @next/next/no-img-element -- cover image comes from TikTok's CDN
               <img src={cover} alt="" loading="lazy" decoding="async"
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 ease-out group-hover:scale-[1.03]" />
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.06]" />
             ) : (
               <BrandCover video={video} />
             )}
@@ -35,10 +35,10 @@ export function TikTokCard({ video, thumbnail }: { video: Video; thumbnail?: str
             <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-brand-900">
               {categoryLabel[video.category]}
             </span>
-            <span aria-hidden className="absolute bottom-3 right-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-brand-900 shadow-lg transition-transform duration-200 group-hover:scale-105 group-active:scale-95">
+            <span aria-hidden className="absolute bottom-3 right-3 flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-brand-900 shadow-lg transition-[scale,background-color] duration-200 group-hover:scale-110 group-hover:bg-white group-active:scale-95">
               <svg viewBox="0 0 24 24" className="ml-0.5 h-5 w-5" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.6-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z" /></svg>
             </span>
-            <span className="absolute bottom-3 left-3 right-[4.25rem] text-white">
+            <span className="absolute bottom-3 left-3 right-[4.25rem] text-white transition-transform duration-300 ease-out group-hover:-translate-y-0.5">
               <span className="block text-xs font-medium text-white/85">{video.place}</span>
               <span className="mt-0.5 block font-display text-lg font-semibold leading-snug text-balance">{video.title}</span>
             </span>
@@ -49,7 +49,7 @@ export function TikTokCard({ video, thumbnail }: { video: Video; thumbnail?: str
         <p className="text-sm text-stone-700">{video.blurb}</p>
         <a href={url} target="_blank" rel="noreferrer"
           className="mt-auto inline-flex min-h-11 items-center gap-1 text-sm font-semibold text-brand-800 hover:underline">
-          Watch on TikTok <Icon name="arrowRight" />
+          Watch on TikTok <span className="transition-transform duration-200 group-hover/card:translate-x-1"><Icon name="arrowRight" /></span>
         </a>
       </figcaption>
     </figure>
