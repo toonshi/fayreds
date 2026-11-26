@@ -39,7 +39,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-2.5">
         {/* logo top left */}
         <Link href="/" className="shrink-0 rounded-lg">
-          <Logo light={overlay} />
+          <Logo light={overlay} photo />
         </Link>
 
         <div className="flex items-center gap-1">

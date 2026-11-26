@@ -1,4 +1,5 @@
 // OWNER: Faith. The Fayreds Travel logo: mark (sun rising over the ocean, with a paper plane) + wordmark.
+import Image from "next/image";
 import { useId } from "react";
 
 export function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
@@ -18,12 +19,17 @@ export function LogoMark({ className = "h-10 w-10" }: { className?: string }) {
   );
 }
 
-/** "Fayreds Travel" is one name: one line, one typeface, beside the mark. */
-export function Logo({ light = false, className = "" }: { light?: boolean; className?: string }) {
+/** "Fayreds Travel" is one name: one line, one typeface. With `photo`, Faith's profile picture (the one on
+ *  all her social accounts) leads, so people recognise her straight away: photo · icon · name. */
+export function Logo({ light = false, photo = false, className = "" }: { light?: boolean; photo?: boolean; className?: string }) {
   return (
-    <span className={`inline-flex items-center gap-2.5 ${className}`}>
-      <LogoMark className="h-10 w-10 shrink-0" />
-      <span translate="no" className={`whitespace-nowrap font-display text-[1.35rem] font-bold leading-none tracking-tight sm:text-2xl ${light ? "text-white" : "text-brand-800"}`}>
+    <span className={`inline-flex items-center gap-2 sm:gap-2.5 ${className}`}>
+      {photo && (
+        <Image src="/images/faith-avatar.webp" alt="Faith Mutune" width={44} height={44} priority
+          className={`h-9 w-9 shrink-0 rounded-full object-cover ring-2 sm:h-11 sm:w-11 ${light ? "ring-white/90" : "ring-white shadow-sm"}`} />
+      )}
+      <LogoMark className="h-9 w-9 shrink-0 sm:h-10 sm:w-10" />
+      <span translate="no" className={`whitespace-nowrap font-display text-xl font-bold leading-none tracking-tight sm:text-2xl ${light ? "text-white" : "text-brand-800"}`}>
         Fayreds Travel
       </span>
     </span>
