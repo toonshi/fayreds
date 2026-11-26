@@ -33,8 +33,8 @@ const contact = (who = "Your"): Field[] => [
   { name: "email", label: "Email address", type: "email", required: true, half: true },
   {
     name: "phone", label: "Phone number", type: "tel", required: true, half: true,
-    placeholder: "0712 345 678 or +44 7700 900123",
-    help: "Kenyan numbers get an SMS confirmation. Everyone gets an email.",
+    placeholder: "0712 345 678",
+    help: "Outside Kenya? Include your country code, e.g. +44 7700 900123. Kenyan numbers get an SMS confirmation; everyone gets an email.",
   },
   { name: "country", label: "Country you live in", type: "country", required: true, half: true },
 ];
@@ -45,7 +45,7 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
     intro:
       "For hotels, staycations, restaurants, tour operators and brands that want to reach Faith's travel community. Tell us about your business and what you have in mind.",
     sections: [
-      { title: "Your details", fields: [...contact(), { name: "role", label: "Your role", type: "text", placeholder: "e.g. Marketing Manager", half: true }] },
+      { title: "Your details", fields: [...contact(), { name: "role", label: "Your role", type: "text", placeholder: "e.g. Marketing Manager…", half: true }] },
       {
         title: "Your business",
         fields: [
@@ -55,7 +55,7 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
             options: ["Hotel / Resort", "Airbnb / Staycation / Villa", "Lodge / Safari camp", "Restaurant / Café / Bar", "Tour operator / Activities", "Travel or lifestyle brand", "Tourism board / Destination", "Event", "Other"],
           },
           { name: "location", label: "Location (town / city, country)", type: "text", required: true, half: true },
-          { name: "website", label: "Website or social media handle", type: "text", placeholder: "@yourbusiness or https://", half: true },
+          { name: "website", label: "Website or social media handle", type: "text", placeholder: "@yourbusiness or https://…", half: true },
         ],
       },
       {
@@ -67,9 +67,9 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
           },
           { name: "goal", label: "Main goal", type: "select", required: true, half: true, options: ["More bookings / sales", "Brand awareness", "Launching something new", "Content for our own pages", "Not sure yet"] },
           { name: "audience", label: "Who you want to reach", type: "select", half: true, options: ["Kenyan travellers", "International travellers", "Both"] },
-          { name: "timing", label: "Preferred dates for the visit or campaign", type: "text", placeholder: "e.g. mid-March, any weekend in April", half: true },
+          { name: "timing", label: "Preferred dates for the visit or campaign", type: "text", placeholder: "e.g. mid-March…", help: "Rough timing is fine, e.g. any weekend in April.", half: true },
           { name: "budget", label: "Budget", type: "select", required: true, half: true, options: ["Hosted experience only (no fee)", "Under KES 20,000 / $150", "KES 20,000–50,000 / $150–400", "KES 50,000–150,000 / $400–1,200", "Above KES 150,000 / $1,200", "Open to a proposal"] },
-          { name: "message", label: "Tell us more", type: "textarea", required: true, placeholder: "What makes your place special, and what you'd like Faith to show." },
+          { name: "message", label: "Tell us more", type: "textarea", required: true, placeholder: "What makes your place special, and what you’d like Faith to show…" },
           { name: "source", label: "How did you hear about Faith?", type: "select", options: ["Instagram", "TikTok", "Facebook", "Referral", "Google", "Other"] },
         ],
       },
@@ -85,10 +85,10 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
       {
         title: "Your trip",
         fields: [
-          { name: "destination", label: "Where do you want to go?", type: "text", required: true, placeholder: "e.g. Diani, Zanzibar, Cape Town, or 'help me choose'", half: true },
+          { name: "destination", label: "Where do you want to go?", type: "text", required: true, placeholder: "e.g. Zanzibar…", help: "A place, a region, or “help me choose”.", half: true },
           { name: "departure", label: "Travelling from (city)", type: "text", required: true, half: true },
           { name: "tripType", label: "Type of trip", type: "select", required: true, half: true, options: ["Holiday / leisure", "Honeymoon / couple's trip", "Family trip", "Solo trip", "Girls' / boys' trip", "Group / company retreat", "Birthday or special occasion", "Business + leisure"] },
-          { name: "dates", label: "Travel dates", type: "text", required: true, placeholder: "e.g. 12–19 Dec, or 'flexible, sometime in June'", half: true },
+          { name: "dates", label: "Travel dates", type: "text", required: true, placeholder: "e.g. 12–19 Dec…", help: "Exact dates or “flexible, sometime in June”.", half: true },
           { name: "adults", label: "Adults", type: "number", required: true, min: 1, max: 100, half: true },
           { name: "children", label: "Children (under 12)", type: "number", min: 0, max: 50, half: true },
           { name: "budget", label: "Budget per person (excluding flights)", type: "select", required: true, half: true, options: ["Under KES 30,000 / $250", "KES 30,000–80,000 / $250–650", "KES 80,000–200,000 / $650–1,600", "Above KES 200,000 / $1,600", "Not sure, advise me"] },
@@ -113,8 +113,8 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
         fields: [
           { name: "company", label: "Company name", type: "text", required: true, half: true },
           { name: "partnerType", label: "Type of partner", type: "select", required: true, half: true, options: ["Hotel / Resort", "Lodge / Safari camp", "Airbnb / Villa / Apartments", "Tour operator / DMC", "Airline / Travel agency", "Car hire / Transfers", "Restaurant / Experience", "Travel gear or lifestyle brand", "Other"] },
-          { name: "locations", label: "Where you operate", type: "text", required: true, placeholder: "e.g. Diani & Watamu, Kenya", half: true },
-          { name: "website", label: "Website", type: "text", required: true, placeholder: "https://", half: true },
+          { name: "locations", label: "Where you operate", type: "text", required: true, placeholder: "e.g. Diani & Watamu, Kenya…", half: true },
+          { name: "website", label: "Website", type: "url", required: true, placeholder: "https://…", half: true },
         ],
       },
       {
@@ -122,10 +122,10 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
         fields: [
           { name: "model", label: "Partnership model(s) you're open to", type: "multi", required: true, options: ["Commission per confirmed booking", "Affiliate / referral link", "Exclusive discount code for Faith's followers", "Co-hosted group trips", "Net rates for Faith's clients", "Other"] },
           { name: "commission", label: "Commission you offer", type: "select", required: true, half: true, options: ["Under 5%", "5–10%", "10–15%", "15–20%", "Above 20%", "Let's discuss"] },
-          { name: "priceRange", label: "Typical price per night / per person", type: "text", placeholder: "e.g. KES 15,000 per night", half: true },
+          { name: "priceRange", label: "Typical price per night / per person", type: "text", placeholder: "e.g. KES 15,000 per night…", half: true },
           { name: "bookingSystem", label: "How bookings would be tracked", type: "select", half: true, options: ["Unique promo code", "Booking link / affiliate platform", "Faith books directly with us", "Not sure yet"] },
           { name: "start", label: "When would you like to start?", type: "select", half: true, options: ["Immediately", "Within a month", "Next season", "Just exploring"] },
-          { name: "message", label: "Tell us about your offer", type: "textarea", required: true, placeholder: "What you offer, who it's for, and any special terms." },
+          { name: "message", label: "Tell us about your offer", type: "textarea", required: true, placeholder: "What you offer, who it’s for, and any special terms…" },
         ],
       },
     ],
@@ -155,6 +155,12 @@ export const forms: Record<FormKind, { title: string; intro: string; sections: F
 export const allFields = (kind: FormKind) => forms[kind].sections.flatMap((s) => s.fields);
 
 /** Validates a submission against the form definition. Returns clean values or a map of errors. */
+const lc = (label: string) => label.charAt(0).toLowerCase() + label.slice(1);
+const requiredMsg = (f: Field) =>
+  f.label.endsWith("?") ? "Please answer this question"
+  : f.type === "select" || f.type === "country" ? `Choose ${lc(f.label)}`
+  : `Enter ${lc(f.label)}`;
+
 export function validate(kind: FormKind, input: Record<string, unknown>) {
   const errors: Record<string, string> = {};
   const values: Record<string, string | string[] | number> = {};
@@ -168,12 +174,13 @@ export function validate(kind: FormKind, input: Record<string, unknown>) {
     }
     const v = typeof raw === "string" ? raw.trim().slice(0, 3000) : raw == null ? "" : String(raw).trim();
     if (!v) {
-      if (f.required) errors[f.name] = "This field is required";
+      if (f.required) errors[f.name] = requiredMsg(f);
       continue;
     }
-    if (f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) errors[f.name] = "Enter a valid email";
-    if (f.type === "select" && !f.options!.includes(v)) errors[f.name] = "Choose an option";
-    if (f.type === "country" && !COUNTRIES.includes(v)) errors[f.name] = "Choose a country";
+    if (f.type === "email" && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) errors[f.name] = "Enter a valid email, e.g. name@example.com";
+    if (f.type === "url" && !/^(https?:\/\/)?[^\s.]+\.[^\s]{2,}/i.test(v)) errors[f.name] = "Enter a web address, e.g. https://yourhotel.com";
+    if (f.type === "select" && !f.options!.includes(v)) errors[f.name] = `Choose ${lc(f.label)}`;
+    if (f.type === "country" && !COUNTRIES.includes(v)) errors[f.name] = "Choose your country";
     if (f.type === "number") {
       const n = Number(v);
       if (!Number.isInteger(n) || (f.min != null && n < f.min) || (f.max != null && n > f.max)) {

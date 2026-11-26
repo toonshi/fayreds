@@ -3,6 +3,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { site, whatsappLink } from "@/lib/site";
+import { Icon } from "@/components/Icon";
 
 export const metadata: Metadata = {
   title: "Thank you · Fayreds Travel",
@@ -23,16 +24,16 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
   const c = copy[valid?.slice(3, 6) ?? ""] ?? { what: "message", next: "Faith will get back to you soon." };
 
   return (
-    <main className="flex min-h-[80vh] items-center bg-stone-50 px-4 py-16 text-stone-900">
+    <main className="flex min-h-[80vh] items-center bg-sand-50 px-4 py-16 text-stone-900">
       <div className="mx-auto w-full max-w-xl rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-stone-200 sm:p-12">
-        <div aria-hidden className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 text-3xl text-teal-700">✓</div>
+        <div aria-hidden className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-brand-50 text-brand-700"><Icon name="check" className="h-8 w-8" /></div>
         <h1 className="mt-6 text-3xl font-bold">Thank you, we&apos;ve got it!</h1>
         <p className="mt-3 text-stone-600">Your {c.what} has been received. {c.next}</p>
 
         {valid && (
-          <div className="mx-auto mt-6 inline-block rounded-xl bg-stone-50 px-5 py-3 ring-1 ring-stone-200">
+          <div className="mx-auto mt-6 inline-block rounded-xl bg-sand-50 px-5 py-3 ring-1 ring-stone-200">
             <p className="text-xs uppercase tracking-wide text-stone-500">Your reference</p>
-            <p className="font-mono text-lg font-semibold tracking-wider">{valid}</p>
+            <p translate="no" className="font-mono text-lg font-semibold tracking-wider">{valid}</p>
           </div>
         )}
 
@@ -42,16 +43,16 @@ export default async function ThankYouPage({ searchParams }: { searchParams: Pro
 
         <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
           <a href={whatsappLink(`Hi Faith, following up on my ${c.what}${valid ? ` (${valid})` : ""}.`)} target="_blank" rel="noreferrer"
-            className="rounded-full bg-emerald-700 px-6 py-3 font-semibold text-white hover:bg-emerald-800">Message Faith on WhatsApp</a>
-          <Link href="/" className="rounded-full border border-stone-300 px-6 py-3 font-medium hover:bg-stone-50">Back to home</Link>
+            className="rounded-full bg-emerald-700 px-6 py-3 font-semibold text-white transition-[background-color,scale] hover:bg-emerald-800 active:scale-[0.96]">Message Faith on WhatsApp</a>
+          <Link href="/" className="rounded-full px-6 py-3 font-medium ring-1 ring-stone-300 bg-white transition-[background-color,scale] hover:bg-brand-50 active:scale-[0.96]">Back to home</Link>
         </div>
 
         <div className="mt-10 border-t border-stone-100 pt-6">
           <p className="text-sm text-stone-500">While you wait, see where Faith is right now</p>
           <ul className="mt-3 flex justify-center gap-5 text-sm font-medium">
-            <li><a href={site.socials.instagram} target="_blank" rel="noreferrer" className="text-teal-800 hover:underline">Instagram</a></li>
-            <li><a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="text-teal-800 hover:underline">TikTok</a></li>
-            <li><a href={site.socials.facebook} target="_blank" rel="noreferrer" className="text-teal-800 hover:underline">Facebook</a></li>
+            <li><a href={site.socials.instagram} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-brand-800 hover:underline">Instagram</a></li>
+            <li><a href={site.socials.tiktok} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-brand-800 hover:underline">TikTok</a></li>
+            <li><a href={site.socials.facebook} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center text-brand-800 hover:underline">Facebook</a></li>
           </ul>
         </div>
       </div>

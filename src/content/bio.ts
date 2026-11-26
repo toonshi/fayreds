@@ -1,10 +1,12 @@
 // OWNER: Faith. DRAFT bio — Faith to read, correct and personalise before launch.
 export const bio = {
   headline: "Hi, I'm Faith",
+  photo: "/images/faith-portrait.webp" as string | undefined,
+  photoAlt: "Faith Mutune smiling in a wide-brimmed sun hat at a beachfront table, palm trees and the Indian Ocean behind her",
   short:
     "Kenyan travel creator and hospitality insider. I find the stays, food and experiences worth your time and money, from Diani to Zanzibar and beyond, and share them honestly with my community.",
   long: [
-    "I'm Faith Mutune, the face behind Fayreds Travel. I started sharing my trips because friends kept asking the same questions: where did you stay, how much did it cost, and was it worth it? Today I create travel content on Instagram, TikTok and Facebook for a community of Kenyan and international travellers.",
+    "I'm Faith Mutune, the face behind Fayreds Travel, a clinician turned travel creator. I started sharing my trips because friends kept asking the same questions: where did you stay, how much did it cost, and was it worth it? Today I create travel content on Instagram, TikTok and Facebook for a community of Kenyan and international travellers.",
     "My background in the hospitality industry means I look at places the way both a guest and an insider would: the service, the details, the value for money. That's what I bring to every hotel, restaurant and experience I feature, and to every trip I plan for a client.",
     "Through Fayreds Travel I help travellers plan trips that fit their budget, host small group trips to places I love, and work with hospitality brands that want to reach people who actually travel.",
   ],
