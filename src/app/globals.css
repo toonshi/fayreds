@@ -128,3 +128,55 @@
 /* hide the native scrollbar on carousels (they have their own buttons and progress bar) */
 .no-scrollbar { scrollbar-width: none; }
 .no-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ---------------------------------------------------------------------------
+   Image motion (home redesign). All of it is skipped for reduced motion,
+   where the first slide / full image simply shows.
+   --------------------------------------------------------------------------- */
+/* Hero slideshow (phones): 4 slides, 6s each, crossfade + slow zoom */
+.hero-slide { opacity: 0; }
+.hero-slide:first-child { opacity: 1; }
+@keyframes hero-fade {
+  0% { opacity: 0; }
+  4% { opacity: 1; }
+  25% { opacity: 1; }
+  29% { opacity: 0; }
+  100% { opacity: 0; }
+}
+@keyframes ken-burns {
+  0% { transform: scale(1.02); }
+  29% { transform: scale(1.12); }
+  100% { transform: scale(1.12); }
+}
+@keyframes ken-burns-solo {
+  from { transform: scale(1.02) translateY(0); }
+  to { transform: scale(1.1) translateY(-1.5%); }
+}
+@keyframes hero-dot {
+  0% { background-color: rgb(255 255 255 / 0.4); width: 0.5rem; }
+  4%, 25% { background-color: #fff; width: 1.5rem; }
+  29%, 100% { background-color: rgb(255 255 255 / 0.4); width: 0.5rem; }
+}
+@keyframes wipe-in {
+  from { clip-path: inset(8% 8% 8% 8% round 1.5rem); opacity: 0.4; }
+  to { clip-path: inset(0 0 0 0 round 0); opacity: 1; }
+}
+@keyframes drift {
+  from { transform: translateY(-6%) scale(1.12); }
+  to { transform: translateY(6%) scale(1.12); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-slide { animation: hero-fade 24s linear infinite both; animation-delay: calc(var(--n, 0) * 6s - 1s); }
+  .hero-slide > img { animation: ken-burns 24s linear infinite both; animation-delay: calc(var(--n, 0) * 6s - 1s); }
+  .hero-dot { animation: hero-dot 24s linear infinite both; animation-delay: calc(var(--n, 0) * 6s - 1s); }
+  /* desktop triptych: each panel zooms slowly, out of step with its neighbours */
+  .hero-panel > img { animation: ken-burns-solo 14s ease-in-out infinite alternate both; animation-delay: calc(var(--n, 0) * -4.5s); }
+
+  @supports (animation-timeline: view()) {
+    /* images uncover themselves as they scroll into view */
+    .img-wipe { animation: wipe-in linear both; animation-timeline: view(); animation-range: entry 0% entry 70%; }
+    /* background photo drifts slower than the page (parallax) */
+    .parallax-img { animation: drift linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
+  }
+}

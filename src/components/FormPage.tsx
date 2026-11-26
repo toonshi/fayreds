@@ -39,7 +39,7 @@ export function FormPage({ kind, eyebrow, title, children, steps, submitLabel, f
             </div>
           </div>
         </div>
-        <section aria-label="Form" className="rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-8 lg:col-span-3">
+        <section id="plan" aria-label="Form" className="scroll-mt-24 rounded-3xl bg-white p-5 shadow-sm ring-1 ring-stone-200 sm:p-8 lg:col-span-3">
           <FormRenderer kind={kind} submitLabel={submitLabel} footnote={footnote} initialValues={initialValues} />
         </section>
       </div>
